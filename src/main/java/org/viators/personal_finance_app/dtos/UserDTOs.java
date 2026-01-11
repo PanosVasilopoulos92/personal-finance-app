@@ -8,6 +8,7 @@ import org.viators.personal_finance_app.model.enums.UserRolesEnum;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @PasswordMatch
 public final class UserDTOs {
@@ -74,8 +75,6 @@ public final class UserDTOs {
             String email,
             String firstName,
             String lastName,
-            String password,
-            String confirmPassword,
             @Min(value = 1, message = "Age must be at least 1")
             @Max(value = 141, message = "Age cannot exceed 141")
             Integer age,
@@ -86,15 +85,37 @@ public final class UserDTOs {
                 username = username.trim();
             }
 
-            if ((password != null && confirmPassword != null) && !password.equals(confirmPassword)) {
-                throw new IllegalArgumentException("Password does not match confirmation password");
-            }
-
             List<UserRolesEnum> availableRoles = Arrays.stream(UserRolesEnum.values()).toList();
             if (userRole != null && (!availableRoles.contains(userRole))) {
                 throw new IllegalArgumentException("Not a valid role provided.");
             }
         }
+
+        public void updateUser(User user) {
+            Optional.ofNullable(username).ifPresent(user::setUsername);
+            Optional.ofNullable(email).ifPresent(user::setEmail);
+            Optional.ofNullable(firstName).ifPresent(user::setFirstName);
+            Optional.ofNullable(lastName).ifPresent(user::setLastName);
+            Optional.ofNullable(age).ifPresent(user::setAge);
+            Optional.ofNullable(userRole).ifPresent(user::setUserRole);
+        }
+    }
+
+    public record UpdateUserPasswordRequest(
+            @NotBlank(message = "Current password is required")
+            String currentPassword,
+            @NotBlank(message = "New password is required")
+            @Size(min = 8, message = "Password must be at least 8 characters")
+            String newPassword,
+            @NotBlank(message = "Password confirmation is required")
+            String confirmPassword
+    ) {
+        public UpdateUserPasswordRequest {
+            if (currentPassword != null && newPassword != null && !newPassword.equals(confirmPassword)) {
+                throw new IllegalArgumentException("New password and confirm password do not match");
+            }
+        }
+
     }
 
     public record UserSummary(
