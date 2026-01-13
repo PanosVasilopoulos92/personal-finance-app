@@ -41,4 +41,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("dateTo") LocalDateTime dateTo
     );
 
+    @Query("""
+            select u.uuid from User u
+            where u.uuid = :uuid
+            """)
+    UserRolesEnum findUserRoleByUuid(@Param("uuid") String uuid);
+
 }
