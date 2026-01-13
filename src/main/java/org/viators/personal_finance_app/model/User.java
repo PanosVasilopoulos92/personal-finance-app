@@ -30,7 +30,7 @@ import java.util.List;
 @AllArgsConstructor
 public class User extends BaseEntity {
 
-    @Column(name = "username", nullable = false, length = 50)
+    @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -49,8 +49,8 @@ public class User extends BaseEntity {
     private Integer age;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "user_role")
-    private UserRolesEnum userRole;
+    @Column(name = "user_role", nullable = false)
+    private UserRolesEnum userRole = UserRolesEnum.USER;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserPreferences userPreferences;

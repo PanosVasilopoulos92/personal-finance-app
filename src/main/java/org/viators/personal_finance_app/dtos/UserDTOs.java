@@ -10,13 +10,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-@PasswordMatch
 public final class UserDTOs {
 
     private UserDTOs() {
         throw new UnsupportedOperationException("Utility class");
     }
 
+    @PasswordMatch
     public record CreateUserRequest(
             @NotBlank(message = "Username is required")
             @Size(max = 50, min = 3, message = "username length must be between 3-50 characters")
@@ -38,8 +38,7 @@ public final class UserDTOs {
             @Size(min = 8, max = 100, message = "Password must be between 8-100 characters")
             @Pattern(
                     regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=]).*$",
-                    message = "Password must contain: digit, lowercase, uppercase, and special character"
-            )
+                    message = "Password must contain: digit, lowercase, uppercase, and special character")
             String password,
 
             @NotBlank(message = "Confirm password is required")
@@ -75,7 +74,7 @@ public final class UserDTOs {
             String email,
             String firstName,
             String lastName,
-            @Min(value = 1, message = "Age must be at least 1")
+            @Min(value = 13, message = "Age must be at least 13")
             @Max(value = 141, message = "Age cannot exceed 141")
             Integer age,
             UserRolesEnum userRole
@@ -101,6 +100,7 @@ public final class UserDTOs {
         }
     }
 
+    @PasswordMatch
     public record UpdateUserPasswordRequest(
             @NotBlank(message = "Current password is required")
             String currentPassword,
@@ -115,7 +115,6 @@ public final class UserDTOs {
                 throw new IllegalArgumentException("New password and confirm password do not match");
             }
         }
-
     }
 
     public record UserSummary(
