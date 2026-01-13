@@ -103,6 +103,13 @@ public class User extends BaseEntity {
         }
     }
 
+    public void addUserPreferences(UserPreferences userPreferences) {
+        if (userPreferences != null) {
+            this.setUserPreferences(userPreferences);
+            userPreferences.setUser(this);
+        }
+    }
+
     public String getFullName() {
         return this.firstName.concat(" ").concat(this.lastName);
     }

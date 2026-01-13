@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.viators.personal_finance_app.model.enums.CurrencyEnum;
 
-import java.util.List;
-
 @Entity
 @Table(name = "user_preferences")
 @Getter
@@ -36,4 +34,19 @@ public class UserPreferences extends BaseEntity {
     @OneToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+
+    // Overloaded constructor
+    public UserPreferences(CurrencyEnum defaultCurrency, String defaultLocation, boolean notificationEnabled, boolean emailAlerts, String preferredStoreIds) {
+        super();
+    }
+
+    public static UserPreferences createDefaultPreferences() {
+        return new UserPreferences(
+                CurrencyEnum.EUR,
+                "",
+                true,
+                true,
+                ""
+        );
+    }
 }
