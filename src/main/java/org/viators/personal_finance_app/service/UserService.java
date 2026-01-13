@@ -1,16 +1,16 @@
 package org.viators.personal_finance_app.service;
 
 import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.viators.personal_finance_app.dtos.UserDTOs;
 import org.viators.personal_finance_app.model.User;
-import org.viators.personal_finance_app.model.enums.StatusEnum;
+import org.viators.personal_finance_app.model.UserPreferences;
 import org.viators.personal_finance_app.repository.UserRepository;
+import org.viators.personal_finance_app.model.enums.StatusEnum;
 
 @Service
 @Transactional
@@ -18,17 +18,44 @@ import org.viators.personal_finance_app.repository.UserRepository;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserDTOs.UserSummary registerUser(UserDTOs.CreateUserRequest createUserRequest) {
-        if (userRepository.existsByEmail(createUserRequest.email())) {
-            throw new EntityExistsException("Entity already exists.");
+    public UserDTOs.UserSummary registerUser(UserDTOs.CreateUserRequest request) {
+        if (userRepository.existsByEmail(request.email())) {
+            throw new EntityExistsException("Email is already in use");
         }
 
-        User userToRegister = createUserRequest.toEntity();
-        userToRegister.setPassword(passwordEncoder.encode(userToRegister.getPassword()));
+        if (userRepository.existsByUsername(request.username())) {
+            throw new EntityExistsException("Username is already in use");
+        }
+
+        if (request.age() < 13) {
+            throw new IllegalArgumentException("User must be above 13 years old in order to register.");
+        }
+
+        User userToRegister = request.toEntity();
+        userToRegister.setPassword(encryptPassword(request.password()));
+
+        //Create default Preferences
+        UserPreferences userPreferences = UserPreferences.createDefaultPreferences();
+        userToRegister.addUserPreferences(userPreferences);
 
         return UserDTOs.UserSummary.from(userRepository.save(userToRegister));
+    }
+
+    private String encryptPassword(String rawPassword) {
+        return passwordEncoder.encode(rawPassword);
+    }
+
+    public boolean updateUserPassword(String uuid, UserDTOs.UpdateUserPasswordRequest request) {
+        User userToUpdate = userRepository.findByUuidAndStatus(uuid, StatusEnum.ACTIVE.getCode()).orElse(null);
+
+        if (userToUpdate == null) {
+            throw new EntityNotFoundException(String.format("User with uuid: %s does not exist", uuid));
+        }
+
+        userToUpdate.setPassword(passwordEncoder.encode(request.newPassword()));
+        return true;
     }
 
     @Transactional(readOnly = true)
@@ -47,14 +74,4 @@ public class UserService {
         return UserDTOs.UserSummary.from(userRepository.save(userToUpdate));
     }
 
-    public boolean updateUserPassword(String uuid, UserDTOs.UpdateUserPasswordRequest request) {
-        User userToUpdate = userRepository.findByUuidAndStatus(uuid, StatusEnum.ACTIVE.getCode()).orElse(null);
-
-        if (userToUpdate == null) {
-            throw new EntityNotFoundException(String.format("User with uuid: %s does not exist", uuid));
-        }
-
-        userToUpdate.setPassword(passwordEncoder.encode(request.newPassword()));
-        return true;
-    }
 }
