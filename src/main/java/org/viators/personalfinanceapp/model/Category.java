@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Category extends BaseEntity {
 
-    @Column(name = "category_name", nullable = false)
+    @Column(name = "category_name", nullable = false, length = 50)
     private String name;
 
     @Column(name = "description")
@@ -32,4 +32,11 @@ public class Category extends BaseEntity {
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
     private List<InflationReport> inflationReports = new ArrayList<>();
+
+    public void addUser(User user) {
+        if (user != null) {
+            this.user = user;
+            this.user.getCategories().add(this);
+        }
+    }
 }
