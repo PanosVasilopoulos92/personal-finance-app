@@ -369,21 +369,22 @@ Create `src/main/resources/logback-spring.xml`:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    
+
     <!-- Include Spring Boot defaults -->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    
+
     <!-- Properties -->
-    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="personal-finance-app"/>
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name"
+                    defaultValue="personal-finance-app"/>
     <property name="LOG_PATH" value="${LOG_PATH:-logs}"/>
-    
+
     <!-- Console appender for development -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %highlight(%-5level) [%thread] %cyan(%logger{36}) - %msg%n</pattern>
         </encoder>
     </appender>
-    
+
     <!-- JSON appender for production -->
     <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/application-json.log</file>
@@ -397,7 +398,7 @@ Create `src/main/resources/logback-spring.xml`:
             <customFields>{"app":"${APP_NAME}"}</customFields>
         </encoder>
     </appender>
-    
+
     <!-- Plain text file appender -->
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/application.log</file>
@@ -411,24 +412,24 @@ Create `src/main/resources/logback-spring.xml`:
             <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    
+
     <!-- Profile-specific configurations -->
     <springProfile name="dev">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
-        <logger name="org.viators.personal_finance_app" level="DEBUG"/>
+        <logger name="org.viators.personalfinanceapp" level="DEBUG"/>
         <logger name="org.hibernate.SQL" level="DEBUG"/>
     </springProfile>
-    
+
     <springProfile name="prod">
         <root level="WARN">
             <appender-ref ref="FILE"/>
             <appender-ref ref="JSON_FILE"/>
         </root>
-        <logger name="org.viators.personal_finance_app" level="INFO"/>
+        <logger name="org.viators.personalfinanceapp" level="INFO"/>
     </springProfile>
-    
+
 </configuration>
 ```
 
