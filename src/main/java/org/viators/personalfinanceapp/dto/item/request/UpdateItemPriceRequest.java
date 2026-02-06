@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.viators.personalfinanceapp.dto.priceobservation.request.CreatePriceObservationRequest;
 
-public record UpdateItemPrice(
+public record UpdateItemPriceRequest(
         @NotBlank(message = "Uuid cannot be null")
         String uuid,
         @Valid
