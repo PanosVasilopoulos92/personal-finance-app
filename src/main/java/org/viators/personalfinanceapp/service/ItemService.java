@@ -2,13 +2,11 @@ package org.viators.personalfinanceapp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.viators.personalfinanceapp.dto.item.request.CreateItemRequest;
-import org.viators.personalfinanceapp.dto.item.request.UpdateItemPrice;
+import org.viators.personalfinanceapp.dto.item.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemRequest;
 import org.viators.personalfinanceapp.dto.item.response.ItemDetailsResponse;
 import org.viators.personalfinanceapp.dto.item.response.ItemSummaryResponse;
@@ -30,18 +28,11 @@ public class ItemService {
     private final StoreRepository storeRepository;
     private final PriceObservationRepository priceObservationRepository;
 
-
     public ItemDetailsResponse getItem(String uuid) {
         Item item = itemRepository.findByUuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Item does not exist"));
 
         return ItemDetailsResponse.from(item);
-    }
-
-    public Page<ItemDetailsResponse> getAllItemsForUser(String userUuid, Pageable pageable) {
-        Page<Item> results = itemRepository.findAllByUser(userUuid, StatusEnum.ACTIVE.getCode(), pageable);
-
-        return results.map(ItemDetailsResponse::from);
     }
 
     @Transactional
@@ -59,7 +50,8 @@ public class ItemService {
         priceObservation.setStore(store);
         item.addPriceObservation(priceObservation);
 
-        return ItemSummaryResponse.from(itemRepository.save(item));
+        item = itemRepository.save(item);
+        return ItemSummaryResponse.from(item);
     }
 
     @Transactional
@@ -95,7 +87,7 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemSummaryResponse updatePrice(String userUuid, UpdateItemPrice request) {
+    public ItemSummaryResponse updatePrice(String userUuid, UpdateItemPriceRequest request) {
         User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
@@ -123,5 +115,4 @@ public class ItemService {
 
         item.setStatus(StatusEnum.INACTIVE.getCode());
     }
-
 }

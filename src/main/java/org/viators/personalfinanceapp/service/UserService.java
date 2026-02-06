@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.viators.personalfinanceapp.dto.item.response.ItemSummaryResponse;
 import org.viators.personalfinanceapp.dto.user.request.CreateUserRequest;
 import org.viators.personalfinanceapp.dto.user.request.UpdateUserPasswordRequest;
 import org.viators.personalfinanceapp.dto.user.request.UpdateUserRequest;
@@ -15,9 +16,11 @@ import org.viators.personalfinanceapp.dto.user.response.UserSummaryResponse;
 import org.viators.personalfinanceapp.exceptions.BusinessException;
 import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
+import org.viators.personalfinanceapp.model.Item;
 import org.viators.personalfinanceapp.model.User;
 import org.viators.personalfinanceapp.model.UserPreferences;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
+import org.viators.personalfinanceapp.repository.ItemRepository;
 import org.viators.personalfinanceapp.repository.UserRepository;
 
 import java.util.List;
@@ -29,6 +32,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ItemRepository itemRepository;
 
     @Transactional
     public UserSummaryResponse registerUser(CreateUserRequest request) {
@@ -140,6 +144,12 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with this uuid"));
 
         return UserSummaryResponse.from(result);
+    }
+
+    public Page<ItemSummaryResponse> getAllItemsForUser(String userUuid, Pageable pageable) {
+        Page<Item> results = itemRepository.findAllByUser(userUuid, StatusEnum.ACTIVE.getCode(), pageable);
+
+        return results.map(ItemSummaryResponse::from);
     }
 
 }
