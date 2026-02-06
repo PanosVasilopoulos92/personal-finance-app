@@ -16,6 +16,7 @@ public record CreateItemRequest(
 
         @Size(min = 5, max = 300, message = "Description must be between 5 and 300 characters")
         String description,
+
         ItemUnitEnum itemUnit, // Throws 'InvalidFormatException' if user provide not available option
 
         @Size(min = 2, max = 50, message = "Brand must be between 2 and 50 characters")
