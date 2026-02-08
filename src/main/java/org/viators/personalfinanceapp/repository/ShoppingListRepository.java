@@ -15,6 +15,13 @@ public interface ShoppingListRepository extends JpaRepository<ShoppingList, Long
 
     Optional<ShoppingList> findByUuidAndStatus(String uuid, String status);
 
+    @Query(value = """
+            select sl from ShoppingList sl
+            left join fetch sl.shoppingListItems
+            where sl.uuid = :slUuid
+            and sl.status = :slStatus""")
+    Optional<ShoppingList> findByUuidAndStatusWithShopListItems(String uuid, String status);
+
     @Query("""
             SELECT new org.viators.personalfinanceapp.dto.shoppinglist.response.ShoppingListSummaryResponse(
                 sl.uuid, sl.name, sl.description, SIZE(sl.shoppingListItems)
@@ -25,4 +32,5 @@ public interface ShoppingListRepository extends JpaRepository<ShoppingList, Long
     List<ShoppingListSummaryResponse> findAllSummariesByUserUuidAndStatus(
             @Param("userUuid") String userUuid,
             @Param("status") String status);
+
 }

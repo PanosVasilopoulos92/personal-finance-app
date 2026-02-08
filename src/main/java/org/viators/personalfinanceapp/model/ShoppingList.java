@@ -28,6 +28,9 @@ public class ShoppingList extends BaseEntity {
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
 
+    @Column(name = "is_favorite")
+    private Boolean isFavorite;
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
@@ -42,6 +45,13 @@ public class ShoppingList extends BaseEntity {
             }
             shoppingListItems.add(item);
             item.setShoppingList(this);
+        }
+    }
+
+    public void removeShoppingListItem(ShoppingListItem item) {
+        if (item != null) {
+            shoppingListItems.remove(item);
+            item.setShoppingList(null);
         }
     }
 }

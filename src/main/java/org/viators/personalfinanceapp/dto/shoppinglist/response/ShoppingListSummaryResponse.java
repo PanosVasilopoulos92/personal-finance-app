@@ -1,13 +1,13 @@
 package org.viators.personalfinanceapp.dto.shoppinglist.response;
 
 import org.viators.personalfinanceapp.model.ShoppingList;
-
 import java.util.List;
 
 public record ShoppingListSummaryResponse(
         String uuid,
         String name,
         String description,
+        Boolean isFavorite,
         int numberOfItems
 ) {
 
@@ -16,6 +16,7 @@ public record ShoppingListSummaryResponse(
                 shoppingList.getUuid(),
                 shoppingList.getName(),
                 shoppingList.getDescription(),
+                shoppingList.getIsFavorite(),
                 shoppingList.getShoppingListItems().size()
         );
     }

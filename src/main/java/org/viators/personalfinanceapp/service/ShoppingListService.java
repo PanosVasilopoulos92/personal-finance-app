@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.viators.personalfinanceapp.dto.shoppinglist.request.CreateShoppingListRequest;
 import org.viators.personalfinanceapp.dto.shoppinglist.request.UpdateShoppingListRequest;
 import org.viators.personalfinanceapp.dto.shoppinglist.response.ShoppingListSummaryResponse;
+import org.viators.personalfinanceapp.exceptions.BusinessException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.ShoppingList;
 import org.viators.personalfinanceapp.model.ShoppingListItem;
@@ -55,6 +56,30 @@ public class ShoppingListService {
 
         shoppingList.addShoppingListItem(shoppingListItem);
         return ShoppingListSummaryResponse.from(shoppingList);
+    }
+
+    @Transactional
+    public void removeShoppingListItemFromList(String shoppingListUuid, String shoppingListItemUuid) {
+        ShoppingList shoppingList = shoppingListRepository.findByUuidAndStatus(shoppingListUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping list not found"));
+
+        ShoppingListItem shoppingListItem = shoppingListItemRepository.findByUuidAndStatus(shoppingListItemUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping list item not found"));
+
+        if (!shoppingListItemRepository.findAllByShoppingList(shoppingListUuid).contains(shoppingListItem.getId())) {
+            throw new BusinessException("Shopping item does not exist in this shopping list");
+        }
+
+        shoppingList.removeShoppingListItem(shoppingListItem);
+        shoppingListItemRepository.delete(shoppingListItem);
+    }
+
+    @Transactional
+    public void deactivateShoppingList(String uuid) {
+        ShoppingList shoppingList = shoppingListRepository.findByUuidAndStatus(uuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping list not found or is already deactivated"));
+
+        shoppingList.setStatus(StatusEnum.INACTIVE.getCode());
     }
 
 
