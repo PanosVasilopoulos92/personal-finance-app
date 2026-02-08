@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import org.viators.personalfinanceapp.dto.shoppinglistitem.response.ShoppingListItemSummaryResponse;
 import org.viators.personalfinanceapp.model.ShoppingListItem;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -36,4 +37,12 @@ public interface ShoppingListItemRepository extends JpaRepository<ShoppingListIt
     Optional<ShoppingListItemSummaryResponse> findShoppingListItemWithRelations(
             @Param("uuid") String uuid,
             @Param("status") String status);
+
+    @Query("""
+        select sli.id from ShoppingListItem sli
+        join sli.shoppingList sl
+        where sl.uuid = :slUuid
+        and sli.shoppingList.uuid = :slUuid
+""")
+    public List<Long> findAllByShoppingList(String slUuid);
 }
