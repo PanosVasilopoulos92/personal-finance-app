@@ -9,8 +9,10 @@ import org.viators.personalfinanceapp.dto.shoppinglist.request.UpdateShoppingLis
 import org.viators.personalfinanceapp.dto.shoppinglist.response.ShoppingListSummaryResponse;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.ShoppingList;
+import org.viators.personalfinanceapp.model.ShoppingListItem;
 import org.viators.personalfinanceapp.model.User;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
+import org.viators.personalfinanceapp.repository.ShoppingListItemRepository;
 import org.viators.personalfinanceapp.repository.ShoppingListRepository;
 import org.viators.personalfinanceapp.repository.UserRepository;
 
@@ -22,6 +24,7 @@ public class ShoppingListService {
 
     private final UserRepository userRepository;
     private final ShoppingListRepository shoppingListRepository;
+    private final ShoppingListItemRepository shoppingListItemRepository;
 
     @Transactional
     public ShoppingListSummaryResponse create(String userUuid, CreateShoppingListRequest request) {
@@ -42,7 +45,17 @@ public class ShoppingListService {
         return ShoppingListSummaryResponse.from(shoppingList);
     }
 
-    public ShoppingListSummaryResponse addListItem() {
+    @Transactional
+    public ShoppingListSummaryResponse addShoppingListItemToList(String shoppingListUuid, String shoppingListItemUuid) {
+        ShoppingList shoppingList = shoppingListRepository.findByUuidAndStatus(shoppingListUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping list not found"));
 
+        ShoppingListItem shoppingListItem = shoppingListItemRepository.findByUuidAndStatus(shoppingListItemUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Shopping list item not found"));
+
+        shoppingList.addShoppingListItem(shoppingListItem);
+        return ShoppingListSummaryResponse.from(shoppingList);
     }
+
+
 }

@@ -10,6 +10,7 @@ import org.viators.personalfinanceapp.dto.userpreferences.response.UserPreferenc
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.Store;
 import org.viators.personalfinanceapp.model.UserPreferences;
+import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.repository.StoreRepository;
 import org.viators.personalfinanceapp.repository.UserPreferencesRepository;
 
@@ -52,7 +53,7 @@ public class UserPreferencesService {
         UserPreferences userPreferences = userPreferencesRepository.findByUser_Uuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with this uuid"));
 
-        Store storeToUpdate = storeRepository.findByUuid(request.uuid())
+        Store storeToUpdate = storeRepository.findByUuidAndStatus(request.uuid(), StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No store found with this uuid"));
 
         if (userPreferences.getPreferredStores().contains(storeToUpdate)) {

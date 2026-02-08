@@ -19,7 +19,7 @@ public record CreateShoppingListItemRequest(
         String storeUuid,
 
         @NotNull(message = "Quantity is required")
-        @DecimalMin(value = "0.01", message = "Quantity must be greater than 0")
+        @DecimalMin(value = "1.0", message = "Quantity must be greater than 0")
         BigDecimal quantity,
 
         @DecimalMin(value = "0.01", message = "Purchased price must be greater than 0")

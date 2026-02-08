@@ -29,7 +29,7 @@ public class ItemService {
     private final PriceObservationRepository priceObservationRepository;
 
     public ItemDetailsResponse getItem(String uuid) {
-        Item item = itemRepository.findByUuid(uuid)
+        Item item = itemRepository.findByUuidAndStatus(uuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item does not exist"));
 
         return ItemDetailsResponse.from(item);
@@ -59,7 +59,7 @@ public class ItemService {
         User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
-        Item item = itemRepository.findByUuid(request.itemUuid())
+        Item item = itemRepository.findByUuidAndStatus(request.itemUuid(), StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
 
         if (item.getUser() != user) {
@@ -91,7 +91,7 @@ public class ItemService {
         User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
-        Item item = itemRepository.findByUuid(request.uuid())
+        Item item = itemRepository.findByUuidAndStatus(request.uuid(), StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
 
         if (item.getUser() != user) {
@@ -110,7 +110,7 @@ public class ItemService {
 
     @Transactional
     public void deactivateItem(String uuid) {
-        Item item = itemRepository.findByUuid(uuid)
+        Item item = itemRepository.findByUuidAndStatus(uuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
 
         item.setStatus(StatusEnum.INACTIVE.getCode());
