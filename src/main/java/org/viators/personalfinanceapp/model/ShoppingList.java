@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -31,6 +32,16 @@ public class ShoppingList extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
 
-    @OneToMany(mappedBy = "shoppingList", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<ShoppingListItem> shoppingListItems = new ArrayList<>();
+
+    public void addShoppingListItem(ShoppingListItem item) {
+        if (item != null) {
+            if (shoppingListItems.contains(item)) {
+                throw new DuplicateResourceException("Shopping list item already exists in shopping list");
+            }
+            shoppingListItems.add(item);
+            item.setShoppingList(this);
+        }
+    }
 }
