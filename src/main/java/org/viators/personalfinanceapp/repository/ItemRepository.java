@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    Optional<Item> findByUuid(String uuid);
+    Optional<Item> findByUuidAndStatus(String uuid, String status);
 
     Optional<Item> findByUuidAndUser_Uuid(String itemUuid, String userUuid);
 

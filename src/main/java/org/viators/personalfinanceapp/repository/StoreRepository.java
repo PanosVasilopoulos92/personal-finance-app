@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    Optional<Store> findByUuid(String uuid);
+    Optional<Store> findByUuidAndStatus(String uuid, String status);
 
     Optional<Store> findByName(String name);
 }
