@@ -1,5 +1,7 @@
 package org.viators.personalfinanceapp.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -14,6 +16,8 @@ import java.util.Optional;
 public interface ShoppingListRepository extends JpaRepository<ShoppingList, Long> {
 
     Optional<ShoppingList> findByUuidAndStatus(String uuid, String status);
+
+    Page<ShoppingList> findAllByUser_UuidAndStatus(String userUuid, String status, Pageable pageable);
 
     @Query(value = """
             select sl from ShoppingList sl
