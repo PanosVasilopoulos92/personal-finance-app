@@ -7,4 +7,11 @@ public class DuplicateResourceException extends BusinessException {
                 ErrorCodeEnum.DUPLICATE_RESOURCE
         );
     }
+
+    public DuplicateResourceException(String message) {
+        super(
+                message,
+                ErrorCodeEnum.DUPLICATE_RESOURCE
+        );
+    }
 }

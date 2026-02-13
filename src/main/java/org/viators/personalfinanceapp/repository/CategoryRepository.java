@@ -24,10 +24,17 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     List<Category> findByUser(Long userId);
 
-
-
     Page<Category> findByUser_Uuid(String userUuid, Pageable pageable);
 
+    @Query("""
+            select count(c.id) from Category c
+            where c.user.uuid = :userUuid
+            and c.status = :status
+            and c.name = :categoryName
+            """)
+    boolean checkAvailabilityOfNameForUpdateCategory(@Param("userUuid")String userUuid,
+                                                     @Param("status") String status,
+                                                     @Param("categoryName") String categoryName);
 
     @Query(value = """
             select c from Category c
