@@ -10,7 +10,6 @@ import org.viators.personalfinanceapp.dto.item.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemRequest;
 import org.viators.personalfinanceapp.dto.item.response.ItemDetailsResponse;
 import org.viators.personalfinanceapp.dto.item.response.ItemSummaryResponse;
-import org.viators.personalfinanceapp.exceptions.BusinessException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.*;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
@@ -72,12 +71,12 @@ public class ItemService {
 
             if (itemRepository.existsByNameAndUser_IdAndStatusAndCategoriesContaining(request.newName(),
                     user.getId(), StatusEnum.ACTIVE.getCode(), category)) {
-                throw new BusinessException("Categories cannot contain items with same name");
+//                throw new BusinessException("Categories cannot contain items with same name");
             }
         } else {
             if (itemRepository.existsByNameAndUser_IdAndStatusAndCategoriesIsEmpty(request.newName(),
                     user.getId(), StatusEnum.ACTIVE.getCode())) {
-                throw new BusinessException("User's items cannot have same name unless they belong to different categories");
+//                throw new BusinessException("User's items cannot have same name unless they belong to different categories");
             }
         }
 

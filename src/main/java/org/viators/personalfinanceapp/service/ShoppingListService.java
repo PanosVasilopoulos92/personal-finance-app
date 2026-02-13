@@ -10,7 +10,6 @@ import org.viators.personalfinanceapp.dto.shoppinglist.request.CreateShoppingLis
 import org.viators.personalfinanceapp.dto.shoppinglist.request.UpdateShoppingListRequest;
 import org.viators.personalfinanceapp.dto.shoppinglist.response.ShoppingListDetailsResponse;
 import org.viators.personalfinanceapp.dto.shoppinglist.response.ShoppingListSummaryResponse;
-import org.viators.personalfinanceapp.exceptions.BusinessException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.ShoppingList;
 import org.viators.personalfinanceapp.model.ShoppingListItem;
@@ -70,7 +69,7 @@ public class ShoppingListService {
                 .orElseThrow(() -> new ResourceNotFoundException("Shopping list item not found"));
 
         if (!shoppingListItemRepository.findAllByShoppingList(shoppingListUuid).contains(shoppingListItem.getId())) {
-            throw new BusinessException("Shopping item does not exist in this shopping list");
+//            throw new BusinessException("Shopping item does not exist in this shopping list");
         }
 
         shoppingList.removeShoppingListItem(shoppingListItem);

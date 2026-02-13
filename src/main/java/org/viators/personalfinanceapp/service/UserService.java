@@ -13,7 +13,6 @@ import org.viators.personalfinanceapp.dto.user.request.UpdateUserPasswordRequest
 import org.viators.personalfinanceapp.dto.user.request.UpdateUserRequest;
 import org.viators.personalfinanceapp.dto.user.response.UserDetailsResponse;
 import org.viators.personalfinanceapp.dto.user.response.UserSummaryResponse;
-import org.viators.personalfinanceapp.exceptions.BusinessException;
 import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.Item;
@@ -106,7 +105,7 @@ public class UserService {
                 new ResourceNotFoundException("Request made from a user that does not exist."));
 
         if (!user.isAdmin()) {
-            throw new BusinessException("User cannot see other users unless is an admin user");
+//            throw new BusinessException("User cannot see other users unless is an admin user");
         }
 
         return userRepository.findAll().stream()
