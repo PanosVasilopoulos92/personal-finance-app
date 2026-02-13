@@ -28,7 +28,7 @@ public interface ShoppingListRepository extends JpaRepository<ShoppingList, Long
 
     @Query("""
             SELECT new org.viators.personalfinanceapp.dto.shoppinglist.response.ShoppingListSummaryResponse(
-                sl.uuid, sl.name, sl.description, SIZE(sl.shoppingListItems)
+                sl.uuid, sl.name, sl.description, sl.isFavorite, SIZE(sl.shoppingListItems)
             )
             FROM ShoppingList sl
             WHERE sl.user.uuid = :userUuid AND sl.status = :status
