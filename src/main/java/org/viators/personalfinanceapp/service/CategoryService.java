@@ -11,6 +11,7 @@ import org.viators.personalfinanceapp.dto.category.request.UpdateCategoryRequest
 import org.viators.personalfinanceapp.dto.category.response.CategoryDetailsResponse;
 import org.viators.personalfinanceapp.dto.category.response.CategorySummaryResponse;
 import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
+import org.viators.personalfinanceapp.exceptions.InvalidStateException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.Category;
 import org.viators.personalfinanceapp.model.Item;
@@ -55,7 +56,7 @@ public class CategoryService {
     @Transactional
     public CategorySummaryResponse create(String userUuid, CreateCategoryRequest request) {
         if (categoryRepository.existsByNameAndUser_UuidAndStatus(request.name(), userUuid, StatusEnum.ACTIVE.getCode())) {
-            throw new DuplicateResourceException("There is already one category with same name for currentUser");
+            throw new DuplicateResourceException("Category", "name", request.name());
         }
 
         User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
@@ -74,8 +75,8 @@ public class CategoryService {
         Category categoryToUpdate = categoryRepository.findByUuidAndUser_UuidAndStatus(categoryUuid, userUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No category found with this uuid for this currentUser"));
 
-        if (categoryRepository.existsByNameAndUser_UuidAndStatus(request.newName(), userUuid, StatusEnum.ACTIVE.getCode())) {
-            throw new DuplicateResourceException("There is already one category with same name for user.");
+        if (categoryRepository.checkAvailabilityOfNameForUpdateCategory(userUuid, StatusEnum.ACTIVE.getCode(), request.newName())) {
+            throw new DuplicateResourceException("Category", "name", request.newName());
         }
 
         request.updateFields(categoryToUpdate);
@@ -99,7 +100,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("No such item exist"));
 
         if (category.getItems().contains(item)) {
-            throw  new DuplicateResourceException("Item already exists in this category");
+            throw  new DuplicateResourceException("Category already contains this item");
         }
 
         category.addItem(item);
@@ -114,7 +115,7 @@ public class CategoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("No such item exist"));
 
         if (!category.getItems().contains(item)) {
-            throw  new IllegalArgumentException("Item does not exists in this category");
+            throw  new InvalidStateException("Item does not exists in this category");
         }
 
         category.removeItem(item);

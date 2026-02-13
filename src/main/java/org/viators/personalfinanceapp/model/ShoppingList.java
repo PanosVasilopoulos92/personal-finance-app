@@ -41,7 +41,7 @@ public class ShoppingList extends BaseEntity {
     public void addShoppingListItem(ShoppingListItem item) {
         if (item != null) {
             if (shoppingListItems.contains(item)) {
-                throw new DuplicateResourceException("Shopping list item already exists in shopping list");
+                throw new DuplicateResourceException("ShoppingListItem", "item", item.getUuid());
             }
             shoppingListItems.add(item);
             item.setShoppingList(this);
