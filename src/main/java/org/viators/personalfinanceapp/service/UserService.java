@@ -37,11 +37,11 @@ public class UserService {
     public UserSummaryResponse registerUser(CreateUserRequest request) {
 
         if (userRepository.existsByEmail(request.email())) {
-            throw new DuplicateResourceException("Email is already in use");
+            throw new DuplicateResourceException("User", "email", request.email());
         }
 
         if (userRepository.existsByUsername(request.username())) {
-            throw new DuplicateResourceException("Username is already in use");
+            throw new DuplicateResourceException("User", "username", request.username());
         }
 
         if (request.age() < 13) {
