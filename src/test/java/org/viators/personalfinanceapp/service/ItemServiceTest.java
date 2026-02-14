@@ -114,7 +114,7 @@ public class ItemServiceTest {
         // Arrange
         when(userRepository.findByUuidAndStatus(testUser.getUuid(), StatusEnum.ACTIVE.getCode()))
                 .thenReturn(Optional.of(testUser));
-        when(storeRepository.findByName(createItemRequest.storeName()))
+        when(storeRepository.findByNameAndStatusAndUserIsNullOrUser_Uuid(createItemRequest.storeName(), StatusEnum.ACTIVE.getCode(), testUser.getUuid()))
                 .thenReturn(Optional.of(testStore));
         // Mocks save operation
         when(itemRepository.save(any(Item.class)))
@@ -141,7 +141,7 @@ public class ItemServiceTest {
         // Arrange
         when(userRepository.findByUuidAndStatus(testUser.getUuid(), StatusEnum.ACTIVE.getCode()))
                 .thenReturn(Optional.of(testUser));
-        when(storeRepository.findByName(createItemRequest.storeName()))
+        when(storeRepository.findByNameAndStatusAndUserIsNullOrUser_Uuid(createItemRequest.storeName(), StatusEnum.ACTIVE.getCode(), testUser.getUuid()))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> itemService.create(testUser.getUuid(), createItemRequest))

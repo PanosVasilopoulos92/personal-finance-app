@@ -1,0 +1,82 @@
+package org.viators.personalfinanceapp.controller;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.viators.personalfinanceapp.dto.store.request.CreateStoreRequest;
+import org.viators.personalfinanceapp.dto.store.request.UpdateStoreRequest;
+import org.viators.personalfinanceapp.dto.store.response.StoreDetailsResponse;
+import org.viators.personalfinanceapp.dto.store.response.StoreSummaryResponse;
+import org.viators.personalfinanceapp.service.StoreService;
+
+import java.net.URI;
+
+@RequestMapping("/api/v1/stores")
+@RequiredArgsConstructor
+@Slf4j
+public class StoreController {
+
+    private final StoreService storeService;
+
+    @GetMapping
+    public ResponseEntity<Page<StoreSummaryResponse>> getStores(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                                                @PageableDefault Pageable pageable) {
+        Page<StoreSummaryResponse> response = storeService.getStores(userUuid, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{storeUuid}")
+    public ResponseEntity<StoreDetailsResponse> getStore(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                                         @PathVariable("storeUuid") String storeUuid) {
+        StoreDetailsResponse response = storeService.getStore(userUuid, storeUuid);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping
+    public ResponseEntity<StoreSummaryResponse> create(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                                       @Valid @RequestBody CreateStoreRequest request) {
+        StoreSummaryResponse response = storeService.create(userUuid, request);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{uuid}")
+                .buildAndExpand(response.uuid())
+                .toUri();
+
+        return ResponseEntity.created(location).body(response);
+    }
+
+    @PutMapping("/{storeUuid}")
+    public ResponseEntity<StoreSummaryResponse> update(@PathVariable("storeUuid") String storeUuid,
+                                                       @Valid @RequestBody UpdateStoreRequest request) {
+        StoreSummaryResponse response = storeService.update(storeUuid, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{storeUuid}/re-activate")
+    public ResponseEntity<Void> reActivateUserStore(@PathVariable String storeUuid) {
+        storeService.reActivateStore(storeUuid);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{storeUuid}/deactivate")
+    public ResponseEntity<Void> deactivateUserStore(@PathVariable String storeUuid) {
+        storeService.deactivateStore(storeUuid);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{storeUuid}")
+    public ResponseEntity<Void> deleteStore(@PathVariable String storeUuid) {
+        storeService.deleteStore(storeUuid);
+        return ResponseEntity.noContent().build();
+    }
+
+}

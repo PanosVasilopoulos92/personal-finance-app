@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.viators.personalfinanceapp.dto.userpreferences.request.UpdatePreferredStoresRequest;
 import org.viators.personalfinanceapp.dto.userpreferences.request.UpdateUserPrefRequest;
@@ -40,9 +41,10 @@ public class UserPreferencesController {
     }
 
     @PutMapping("/{uuid}/update-favorite-stores")
-    public ResponseEntity<Void> updateFavoriteStores(@PathVariable() String uuid,
+    public ResponseEntity<Void> updateFavoriteStores(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                                     @PathVariable() String uuid,
                                                      @RequestBody @Valid UpdatePreferredStoresRequest request) {
-        userPreferencesService.updateUserPreferredStores(uuid, request);
+        userPreferencesService.updateUserPreferredStores(userUuid, uuid, request);
         return ResponseEntity.noContent().build();
     }
 }

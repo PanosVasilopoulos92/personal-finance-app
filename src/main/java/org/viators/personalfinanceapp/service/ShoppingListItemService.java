@@ -34,7 +34,7 @@ public class ShoppingListItemService {
         Item item = itemRepository.findByUuidAndStatus(request.itemUuid(), StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item wasn't found"));
 
-        Store store = storeRepository.findByUuidAndStatus(request.storeUuid(), StatusEnum.ACTIVE.getCode())
+        Store store = storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(request.storeUuid(), StatusEnum.ACTIVE.getCode(), userUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found"));
 
         ShoppingListItem shoppingListItem = request.toEntity(shoppingList, item, store);
