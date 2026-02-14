@@ -49,11 +49,11 @@ public class UserPreferencesService {
     }
 
     @Transactional
-    public void updateUserPreferredStores(String uuid, UpdatePreferredStoresRequest request) {
+    public void updateUserPreferredStores(String userUuid, String uuid, UpdatePreferredStoresRequest request) {
         UserPreferences userPreferences = userPreferencesRepository.findByUser_Uuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with this uuid"));
 
-        Store storeToUpdate = storeRepository.findByUuidAndStatus(request.uuid(), StatusEnum.ACTIVE.getCode())
+        Store storeToUpdate = storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(request.uuid(), StatusEnum.ACTIVE.getCode(), userUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("No store found with this uuid"));
 
         if (userPreferences.getPreferredStores().contains(storeToUpdate)) {

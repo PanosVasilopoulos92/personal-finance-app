@@ -39,7 +39,7 @@ public class ItemService {
         User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
-        Store store = storeRepository.findByName(request.storeName())
+        Store store = storeRepository.findByNameAndStatusAndUserIsNullOrUser_Uuid(request.storeName(), StatusEnum.ACTIVE.getCode(), userUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Store could not be found"));
 
         Item item = request.toEntity();
