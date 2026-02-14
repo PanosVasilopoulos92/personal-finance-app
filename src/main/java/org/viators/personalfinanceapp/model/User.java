@@ -3,11 +3,15 @@ package org.viators.personalfinanceapp.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
+import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.model.enums.UserRolesEnum;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(
@@ -77,6 +81,10 @@ public class User extends BaseEntity {
     @Builder.Default
     private List<Basket> baskets = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private Set<Store> stores = new HashSet<>();
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,6 +116,29 @@ public class User extends BaseEntity {
         if (userPreferences != null) {
             this.setUserPreferences(userPreferences);
             userPreferences.setUser(this);
+        }
+    }
+
+    public void addStore(Store store) {
+        if (store != null) {
+            if (stores.contains(store)) {
+                throw new DuplicateResourceException(
+                        "User already contains this store");
+            }
+            this.stores.add(store);
+            store.setUser(this);
+        }
+    }
+
+    public void removeStore(Store store) {
+        if (store != null) {
+            if (!stores.contains(store)) {
+                throw new ResourceNotFoundException(
+                        "User does not have this store"
+                );
+            }
+            this.stores.remove(store);
+            store.setUser(null);
         }
     }
 
