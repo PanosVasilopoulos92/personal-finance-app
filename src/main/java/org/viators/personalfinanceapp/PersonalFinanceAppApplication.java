@@ -16,7 +16,6 @@ public class PersonalFinanceAppApplication {
 
 	public static void main(String[] args) {
 		loadEnvFile();
-
 		SpringApplication.run(PersonalFinanceAppApplication.class, args);
 	}
 

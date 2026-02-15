@@ -17,6 +17,7 @@ import org.viators.personalfinanceapp.model.User;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.repository.StoreRepository;
 import org.viators.personalfinanceapp.repository.UserRepository;
+import org.viators.personalfinanceapp.utils.Utils;
 
 @Service
 @RequiredArgsConstructor
@@ -45,7 +46,8 @@ public class StoreService {
         User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("User", userUuid));
 
-        if (storeRepository.existsByNameAndStatusAndUserIsNotNullAndUser_Uuid(request.name(), StatusEnum.ACTIVE.getCode(), userUuid)) {
+        if (storeRepository.existsByNameIgnoreCaseAndStatusAndUserIsNotNullAndUser_Uuid(request.name(),
+                StatusEnum.ACTIVE.getCode(), userUuid)) {
             throw new DuplicateResourceException("Store", "name", request.name());
         }
 
@@ -57,39 +59,43 @@ public class StoreService {
     }
 
     @Transactional
-    public StoreSummaryResponse update(String storeUuid, UpdateStoreRequest request) {
+    public StoreSummaryResponse update(String userUuid, String storeUuid, UpdateStoreRequest request) {
+
         Store store = storeRepository.findByUuidAndStatus(storeUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Store", storeUuid));
+
+        Utils.loggedInUserIsOwner(userUuid, store.getUser().getUuid());
 
         request.updateStore(store);
         return StoreSummaryResponse.from(store);
     }
 
     @Transactional
-    public void deactivateStore(String storeUuid) {
+    public void deActivateStore(String userUuid, String storeUuid) {
         Store store = storeRepository.findByUuidAndStatusAndUserIsNotNull(storeUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Store with uuid: %s not found or is already inactive.".formatted(storeUuid)));
 
+        Utils.loggedInUserIsOwner(userUuid, store.getUser().getUuid());
         store.setStatus(StatusEnum.INACTIVE.getCode());
     }
 
     @Transactional
-    public void reActivateStore(String storeUuid) {
+    public void reActivateStore(String userUuid, String storeUuid) {
         Store store = storeRepository.findByUuidAndStatusAndUserIsNotNull(storeUuid, StatusEnum.INACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Store with uuid: %s not found or is already active.".formatted(storeUuid)));
 
+        Utils.loggedInUserIsOwner(userUuid, store.getUser().getUuid());
         store.setStatus(StatusEnum.ACTIVE.getCode());
     }
 
     @Transactional
     public void deleteStore(String storeUuid) {
-        Store store = storeRepository.findByUuidAndStatusAndUserIsNotNull(storeUuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Store with uuid: %s not found or is inactive.".formatted(storeUuid)));
+        Store store = storeRepository.findByUuidAndStatusAndUserIsNull(storeUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Store with uuid: %s not found or is inactive or belongs to a user".formatted(storeUuid))
+                );
 
-        User user = userRepository.findById(store.getUser().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", store.getUser().getId()));
-
-        user.removeStore(store);
+        storeRepository.delete(store);
     }
 
 }

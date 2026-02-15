@@ -8,14 +8,12 @@ import java.util.stream.Collectors;
 
 public record StoreSummaryResponse(
         String uuid,
-        Long id,
         String name,
         StoreTypeEnum storeType
 ) {
     public static StoreSummaryResponse from(Store store) {
         return new StoreSummaryResponse(
                 store.getUuid(),
-                store.getId(),
                 store.getName(),
                 store.getStoreType());
     }
