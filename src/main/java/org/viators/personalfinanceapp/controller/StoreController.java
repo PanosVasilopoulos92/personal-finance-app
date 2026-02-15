@@ -19,6 +19,7 @@ import org.viators.personalfinanceapp.service.StoreService;
 
 import java.net.URI;
 
+@RestController
 @RequestMapping("/api/v1/stores")
 @RequiredArgsConstructor
 @Slf4j
@@ -54,21 +55,24 @@ public class StoreController {
     }
 
     @PutMapping("/{storeUuid}")
-    public ResponseEntity<StoreSummaryResponse> update(@PathVariable("storeUuid") String storeUuid,
+    public ResponseEntity<StoreSummaryResponse> update(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                                       @PathVariable("storeUuid") String storeUuid,
                                                        @Valid @RequestBody UpdateStoreRequest request) {
-        StoreSummaryResponse response = storeService.update(storeUuid, request);
+        StoreSummaryResponse response = storeService.update(userUuid, storeUuid, request);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{storeUuid}/re-activate")
-    public ResponseEntity<Void> reActivateUserStore(@PathVariable String storeUuid) {
-        storeService.reActivateStore(storeUuid);
+    public ResponseEntity<Void> reActivateUserStore(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                                    @PathVariable String storeUuid) {
+        storeService.reActivateStore(userUuid, storeUuid);
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/{storeUuid}/deactivate")
-    public ResponseEntity<Void> deactivateUserStore(@PathVariable String storeUuid) {
-        storeService.deactivateStore(storeUuid);
+    public ResponseEntity<Void> deactivateUserStore(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                                    @PathVariable String storeUuid) {
+        storeService.deActivateStore(userUuid, storeUuid);
         return ResponseEntity.noContent().build();
     }
 

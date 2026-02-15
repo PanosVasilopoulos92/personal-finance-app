@@ -10,6 +10,10 @@ public record UserSummaryResponse(
         String status
 ) {
     public static UserSummaryResponse from(User user) {
+        if (user == null) {
+            return null;
+        }
+
         return new UserSummaryResponse(
                 user.getUuid(),
                 user.getUsername(),
