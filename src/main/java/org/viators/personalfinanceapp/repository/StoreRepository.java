@@ -21,6 +21,8 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 
     Optional<Store> findByUuidAndStatusAndUserIsNotNull(String uuid, String status);
 
+    Optional<Store> findByUuidAndStatusAndUserIsNull(String uuid, String status);
+
     @Query("""
             select s from Store s
             where s.status = :status
@@ -30,5 +32,5 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
                                               @Param("userUuid") String userUuid,
                                               Pageable pageable);
 
-    boolean existsByNameAndStatusAndUserIsNotNullAndUser_Uuid(String name, String status, String userUuid);
+    boolean existsByNameIgnoreCaseAndStatusAndUserIsNotNullAndUser_Uuid(String name, String status, String userUuid);
 }
