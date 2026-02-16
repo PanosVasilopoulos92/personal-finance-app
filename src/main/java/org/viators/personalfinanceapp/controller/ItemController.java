@@ -2,6 +2,10 @@ package org.viators.personalfinanceapp.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -20,9 +24,18 @@ public class ItemController {
 
     private final ItemService itemService;
 
+    @GetMapping
+    public ResponseEntity<Page<ItemSummaryResponse>> getItems(@AuthenticationPrincipal(expression = "currentUser.uuid") String loggedInUserUuid,
+                                                              @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ItemSummaryResponse> response = itemService.getItems(loggedInUserUuid, pageable);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/{uuid}")
-    public ResponseEntity<ItemDetailsResponse> getItemWithDetails(@PathVariable String uuid) {
-        return ResponseEntity.ok(itemService.getItem(uuid));
+    public ResponseEntity<ItemDetailsResponse> getItemWithDetails(@AuthenticationPrincipal(expression = "currentUser.uuid") String loggedInUserUuid,
+                                                                  @PathVariable String uuid) {
+        return ResponseEntity.ok(itemService.getItem(uuid, loggedInUserUuid));
     }
 
     @PostMapping

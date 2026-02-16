@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,7 +30,7 @@ public class StoreController {
 
     @GetMapping
     public ResponseEntity<Page<StoreSummaryResponse>> getStores(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
-                                                                @PageableDefault Pageable pageable) {
+                                                                @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<StoreSummaryResponse> response = storeService.getStores(userUuid, pageable);
         return ResponseEntity.ok(response);
     }
