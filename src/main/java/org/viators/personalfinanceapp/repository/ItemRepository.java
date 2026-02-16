@@ -16,6 +16,8 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     Optional<Item> findByUuidAndUser_Uuid(String itemUuid, String userUuid);
 
+    Page<Item> findAllByUser_UuidAndStatus(String userUuid, String status, Pageable pageable);
+
     boolean existsByUuidAndStatus(String uuid, String status);
 
     boolean existsByNameAndUser_IdAndStatusAndCategoriesContaining(String name, Long userId,

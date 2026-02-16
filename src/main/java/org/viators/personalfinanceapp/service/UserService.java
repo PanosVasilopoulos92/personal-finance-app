@@ -22,8 +22,6 @@ import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.repository.ItemRepository;
 import org.viators.personalfinanceapp.repository.UserRepository;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor // used for DI
 @Slf4j
@@ -100,25 +98,8 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public List<UserSummaryResponse> findAllUsers(String uuid) {
-        User user = userRepository.findByUuid(uuid).orElseThrow(() ->
-                new ResourceNotFoundException("Request made from a user that does not exist."));
-
-        if (!user.isAdmin()) {
-//            throw new BusinessException("User cannot see other users unless is an admin user");
-        }
-
-        return userRepository.findAll().stream()
-                .map(UserSummaryResponse::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public Page<UserSummaryResponse> findAllUsersPaginated(Pageable pageable) {
-
-        Page<User> users= userRepository.findAll(pageable);
-
-        return users.map(UserSummaryResponse::from);
+    public Page<UserSummaryResponse> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable).map(UserSummaryResponse::from);
     }
 
     @Transactional(readOnly = true)

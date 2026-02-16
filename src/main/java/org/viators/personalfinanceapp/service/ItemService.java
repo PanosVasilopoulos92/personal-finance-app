@@ -2,6 +2,8 @@ package org.viators.personalfinanceapp.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,10 +12,12 @@ import org.viators.personalfinanceapp.dto.item.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemRequest;
 import org.viators.personalfinanceapp.dto.item.response.ItemDetailsResponse;
 import org.viators.personalfinanceapp.dto.item.response.ItemSummaryResponse;
+import org.viators.personalfinanceapp.exceptions.BusinessValidationException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.*;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.repository.*;
+import org.viators.personalfinanceapp.utils.Utils;
 
 @Service
 @RequiredArgsConstructor
@@ -27,19 +31,28 @@ public class ItemService {
     private final StoreRepository storeRepository;
     private final PriceObservationRepository priceObservationRepository;
 
-    public ItemDetailsResponse getItem(String uuid) {
+    public ItemDetailsResponse getItem(String uuid, String loggedInUserUuid) {
         Item item = itemRepository.findByUuidAndStatus(uuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item does not exist"));
 
+        Utils.loggedInUserIsOwner(loggedInUserUuid, item.getUser().getUuid());
         return ItemDetailsResponse.from(item);
     }
 
+    public Page<ItemSummaryResponse> getItems(String loggedInUserUuid, Pageable pageable) {
+        User user = userRepository.findByUuidAndStatus(loggedInUserUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(()-> new ResourceNotFoundException("User", "uuid", loggedInUserUuid));
+
+        return itemRepository.findAllByUser_UuidAndStatus(loggedInUserUuid, StatusEnum.ACTIVE.getCode(), pageable)
+                .map(ItemSummaryResponse::from);
+    }
+
     @Transactional
-    public ItemSummaryResponse create(String userUuid, CreateItemRequest request) {
-        User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
+    public ItemSummaryResponse create(String loggedInUserUuid, CreateItemRequest request) {
+        User user = userRepository.findByUuidAndStatus(loggedInUserUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
-        Store store = storeRepository.findByNameAndStatusAndUserIsNullOrUser_Uuid(request.storeName(), StatusEnum.ACTIVE.getCode(), userUuid)
+        Store store = storeRepository.findByNameAndStatusAndUserIsNullOrUser_Uuid(request.storeName(), StatusEnum.ACTIVE.getCode(), loggedInUserUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Store could not be found"));
 
         Item item = request.toEntity();
@@ -54,8 +67,8 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemSummaryResponse update(String userUuid, UpdateItemRequest request) {
-        User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
+    public ItemSummaryResponse update(String loggedInUserUuid, UpdateItemRequest request) {
+        User user = userRepository.findByUuidAndStatus(loggedInUserUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
         Item item = itemRepository.findByUuidAndStatus(request.itemUuid(), StatusEnum.ACTIVE.getCode())
@@ -71,12 +84,13 @@ public class ItemService {
 
             if (itemRepository.existsByNameAndUser_IdAndStatusAndCategoriesContaining(request.newName(),
                     user.getId(), StatusEnum.ACTIVE.getCode(), category)) {
-//                throw new BusinessException("Categories cannot contain items with same name");
+                throw new BusinessValidationException("Categories cannot contain items with same name") {
+                };
             }
         } else {
             if (itemRepository.existsByNameAndUser_IdAndStatusAndCategoriesIsEmpty(request.newName(),
                     user.getId(), StatusEnum.ACTIVE.getCode())) {
-//                throw new BusinessException("User's items cannot have same name unless they belong to different categories");
+                throw new BusinessValidationException("User's items cannot have same name unless they belong to different categories");
             }
         }
 

@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,11 +26,10 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<UserSummaryResponse> register(
-            @Valid @RequestBody CreateUserRequest request) {
-        UserSummaryResponse response = userService.registerUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @GetMapping
+    public ResponseEntity<Page<UserSummaryResponse>> getUsers(@PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<UserSummaryResponse> response = userService.getAllUsers(pageable);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{uuid}/details")
@@ -37,6 +37,13 @@ public class UserController {
         UserDetailsResponse response = userService.findUserByUuidWithAllRelationships(uuid);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserSummaryResponse> register(@Valid @RequestBody CreateUserRequest request) {
+        UserSummaryResponse response = userService.registerUser(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
 
     @GetMapping("/{uuid}")
     public ResponseEntity<UserSummaryResponse> getUser(@PathVariable String uuid) {
