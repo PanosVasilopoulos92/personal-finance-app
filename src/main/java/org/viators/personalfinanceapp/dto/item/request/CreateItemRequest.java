@@ -22,8 +22,8 @@ public record CreateItemRequest(
         @Size(min = 2, max = 50, message = "Brand must be between 2 and 50 characters")
         String brand,
 
-        @NotBlank(message = "Store's name is required")
-        String storeName,
+        @NotBlank(message = "Store is required")
+        String storeUuid,
 
         @Valid
         CreatePriceObservationRequest createPriceObservationRequest

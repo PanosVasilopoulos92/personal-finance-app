@@ -12,6 +12,10 @@ public record StoreSummaryResponse(
         StoreTypeEnum storeType
 ) {
     public static StoreSummaryResponse from(Store store) {
+        if (store == null) {
+            return null;
+        }
+
         return new StoreSummaryResponse(
                 store.getUuid(),
                 store.getName(),

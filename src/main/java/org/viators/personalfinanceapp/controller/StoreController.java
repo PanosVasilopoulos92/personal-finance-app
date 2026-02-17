@@ -63,7 +63,7 @@ public class StoreController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{storeUuid}/re-activate")
+    @PatchMapping("/{storeUuid}/re-activate")
     public ResponseEntity<Void> reActivateUserStore(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
                                                     @PathVariable String storeUuid) {
         storeService.reActivateStore(userUuid, storeUuid);
