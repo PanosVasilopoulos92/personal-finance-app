@@ -41,7 +41,7 @@ public class ItemService {
 
     public Page<ItemSummaryResponse> getItems(String loggedInUserUuid, Pageable pageable) {
         User user = userRepository.findByUuidAndStatus(loggedInUserUuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(()-> new ResourceNotFoundException("User", "uuid", loggedInUserUuid));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "uuid", loggedInUserUuid));
 
         return itemRepository.findAllByUser_UuidAndStatus(loggedInUserUuid, StatusEnum.ACTIVE.getCode(), pageable)
                 .map(ItemSummaryResponse::from);
@@ -52,7 +52,7 @@ public class ItemService {
         User user = userRepository.findByUuidAndStatus(loggedInUserUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
-        Store store = storeRepository.findByNameAndStatusAndUserIsNullOrUser_Uuid(request.storeName(), StatusEnum.ACTIVE.getCode(), loggedInUserUuid)
+        Store store = storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(request.storeUuid(), StatusEnum.ACTIVE.getCode(), loggedInUserUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Store could not be found"));
 
         Item item = request.toEntity();
@@ -100,32 +100,38 @@ public class ItemService {
     }
 
     @Transactional
-    public ItemSummaryResponse updatePrice(String userUuid, UpdateItemPriceRequest request) {
+    public ItemSummaryResponse updatePrice(String userUuid, String itemUuid, UpdateItemPriceRequest request) {
         User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
-        Item item = itemRepository.findByUuidAndStatus(request.uuid(), StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+        Utils.loggedInUserIsOwner(userUuid, user.getUuid());
 
-        if (item.getUser() != user) {
-            throw new AccessDeniedException("User can only update items that belong to him/her");
-        }
+        Item item = itemRepository.findByUuidAndStatus(itemUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Item", itemUuid));
+
+        Store store = storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(
+                        request.createPriceObservationRequest().storeUuid(),
+                        StatusEnum.ACTIVE.getCode(),
+                        userUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Store", "uuid", request.createPriceObservationRequest().storeUuid()));
 
         PriceObservation lastPriceObservation = priceObservationRepository.findLastActivePriceObservation(item.getUuid(), StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No active price found for this item"));
         lastPriceObservation.setStatus(StatusEnum.INACTIVE.getCode());
 
         PriceObservation newPriceObservation = request.createPriceObservationRequest().toEntity();
+        newPriceObservation.setStore(store);
         item.addPriceObservation(newPriceObservation);
 
         return ItemSummaryResponse.from(item);
     }
 
     @Transactional
-    public void deactivateItem(String uuid) {
-        Item item = itemRepository.findByUuidAndStatus(uuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Item not found"));
+    public void deactivateItem(String userUuid, String itemUuid) {
+        Item item = itemRepository.findByUuidAndStatus(itemUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Item", itemUuid));
 
+        Utils.loggedInUserIsOwner(userUuid, item.getUser().getUuid());
         item.setStatus(StatusEnum.INACTIVE.getCode());
     }
 }
