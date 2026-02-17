@@ -13,7 +13,7 @@ public interface PriceObservationRepository extends JpaRepository<PriceObservati
 
     @Query("""
             select po from PriceObservation po
-            where po.uuid = :uuid
+            where po.item.uuid = :uuid
             and po.status = :status
             order by po.createdAt desc
             limit 1
