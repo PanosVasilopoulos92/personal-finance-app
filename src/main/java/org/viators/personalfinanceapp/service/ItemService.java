@@ -52,7 +52,8 @@ public class ItemService {
         User user = userRepository.findByUuidAndStatus(loggedInUserUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
-        Store store = storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(request.storeUuid(), StatusEnum.ACTIVE.getCode(), loggedInUserUuid)
+        Store store = storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(request.createPriceObservationRequest().storeUuid(),
+                        StatusEnum.ACTIVE.getCode(), loggedInUserUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Store could not be found"));
 
         Item item = request.toEntity();
@@ -104,7 +105,6 @@ public class ItemService {
         User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No such user in system"));
 
-        Utils.loggedInUserIsOwner(userUuid, user.getUuid());
 
         Item item = itemRepository.findByUuidAndStatus(itemUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item", itemUuid));
@@ -114,6 +114,8 @@ public class ItemService {
                         StatusEnum.ACTIVE.getCode(),
                         userUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Store", "uuid", request.createPriceObservationRequest().storeUuid()));
+
+        Utils.loggedInUserIsOwner(userUuid, item.getUser().getUuid());
 
         PriceObservation lastPriceObservation = priceObservationRepository.findLastActivePriceObservation(item.getUuid(), StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No active price found for this item"));
