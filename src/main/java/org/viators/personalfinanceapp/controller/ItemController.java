@@ -54,14 +54,16 @@ public class ItemController {
 
     @PostMapping("/{uuid}/update-price")
     public ResponseEntity<ItemSummaryResponse> updatePrice(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                                           @PathVariable("uuid") String itemUuid,
                                                            @RequestBody @Valid UpdateItemPriceRequest request) {
-        ItemSummaryResponse response = itemService.updatePrice(userUuid, request);
+        ItemSummaryResponse response = itemService.updatePrice(userUuid, itemUuid, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{uuid}")
-    public ResponseEntity<Void> deactivateItem(@PathVariable String uuid) {
-        itemService.deactivateItem(uuid);
+    public ResponseEntity<Void> deactivateItem(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
+                                               @PathVariable("uuid") String itemUuid) {
+        itemService.deactivateItem(userUuid, itemUuid);
         return ResponseEntity.noContent().build();
     }
 }

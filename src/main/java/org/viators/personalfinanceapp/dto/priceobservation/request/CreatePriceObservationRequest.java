@@ -5,7 +5,7 @@ import org.viators.personalfinanceapp.model.PriceObservation;
 import org.viators.personalfinanceapp.model.enums.CurrencyEnum;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.Optional;
 
 public record CreatePriceObservationRequest(
@@ -19,7 +19,7 @@ public record CreatePriceObservationRequest(
 
         @NotNull(message = "Date of observation is required")
         @PastOrPresent(message = "Observation date cannot be in the future")
-        LocalDate observationDate,
+        Instant observationDate,
 
         @NotBlank(message = "Location is required")
         @Size(max = 100, message = "Location must not exceed 100 characters")
@@ -28,11 +28,11 @@ public record CreatePriceObservationRequest(
         @Size(max = 400, message = "Notes must not exceed 400 characters")
         String notes,  // Optional field
 
-        @NotNull(message = "Item ID is required")
-        Long itemId,
+        @NotBlank(message = "Item is required")
+        String itemUuid,
 
-        @NotNull(message = "Store ID is required")
-        Long storeId
+        @NotBlank(message = "Store is required")
+        String storeUuid
 ) {
     public PriceObservation toEntity() {
         PriceObservation priceObservation = new PriceObservation();
