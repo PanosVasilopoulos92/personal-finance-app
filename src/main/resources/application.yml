@@ -22,3 +22,16 @@ spring:
 jwt:
   secret: dev-secret-key-minimum-32-characters-long-for-hmac-sha256
   expiration: 3600000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs    # Where the JSON spec is served
+  swagger-ui:
+    path: /swagger-ui.html    # Swagger UI entry point
+    operations-sorter: method   # Sort endpoints by HTTP method
+    tags-sorter: alpha    # Sort tags alphabetically
+    display-request-duration: true    # Show how long each test request took
+  show-actuator: false     # Hide actuator endpoints from docs
+  default-flat-param-object: true   # This tells SpringDoc to automatically explode Pageable into page, size, sort query params without needing @ParameterObject on every method
+  default-produces-media-type: application/json
+  default-consumes-media-type: application/json

@@ -19,7 +19,7 @@ import org.viators.personalfinanceapp.dto.user.response.UserSummaryResponse;
 import org.viators.personalfinanceapp.service.UserService;
 
 @RestController
-@RequestMapping("/api/v1/user")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
@@ -51,7 +51,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PutMapping("/{uuid}/update")
+    @PutMapping("/{uuid}")
     public ResponseEntity<UserSummaryResponse> updateUser(@PathVariable String uuid, @RequestBody UpdateUserRequest request) {
         UserSummaryResponse response = userService.updateUserInfo(uuid, request);
         return ResponseEntity.ok(response);
