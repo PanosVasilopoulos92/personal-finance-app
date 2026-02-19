@@ -8,6 +8,7 @@ import org.viators.personalfinanceapp.security.UserDetailsImpl;
 import java.util.Optional;
 
 public class SpringSecurityAuditorAware implements AuditorAware<String> {
+
     @Override
     public Optional<String> getCurrentAuditor() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -20,7 +21,7 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();
 
         return principal != null
-                ? Optional.of(principal.getUsername())
+                ? Optional.of(principal.currentUser().getUsername())
                 : Optional.empty();
     }
 }

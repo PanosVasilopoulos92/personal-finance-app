@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
  *
  * <p>Maps to the exceptions thrown by the service layer:</p>
  * <ul>
- *   <li>403 — {@code AccessDeniedException} via {@code Utils.loggedInUserIsOwner()}</li>
+ *   <li>403 — {@code AccessDeniedException} via {@code OwnershipAuthorizationService.verifyOwnership()}</li>
  *   <li>404 — {@code ResourceNotFoundException} when UUID doesn't match an active record</li>
  * </ul>
  *

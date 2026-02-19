@@ -17,7 +17,7 @@ import org.viators.personalfinanceapp.model.User;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.repository.StoreRepository;
 import org.viators.personalfinanceapp.repository.UserRepository;
-import org.viators.personalfinanceapp.utils.Utils;
+import org.viators.personalfinanceapp.security.OwnershipAuthorizationService;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +27,7 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final UserRepository userRepository;
+    private final OwnershipAuthorizationService ownershipAuthorizationService;
 
     public Page<StoreSummaryResponse> getStores(String userUuid, Pageable pageable) {
         Page<Store> stores = storeRepository.findAllAvailableStoresForUser(StatusEnum.ACTIVE.getCode(), userUuid, pageable);
@@ -64,7 +65,7 @@ public class StoreService {
         Store store = storeRepository.findByUuidAndStatus(storeUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Store", storeUuid));
 
-        Utils.loggedInUserIsOwner(userUuid, store.getUser().getUuid());
+        ownershipAuthorizationService.verifyOwnership(userUuid, store.getUser().getUuid());
 
         request.updateStore(store);
         return StoreSummaryResponse.from(store);
@@ -75,7 +76,7 @@ public class StoreService {
         Store store = storeRepository.findByUuidAndStatusAndUserIsNotNull(storeUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Store with uuid: %s not found or is already inactive.".formatted(storeUuid)));
 
-        Utils.loggedInUserIsOwner(userUuid, store.getUser().getUuid());
+        ownershipAuthorizationService.verifyOwnership(userUuid, store.getUser().getUuid());
         store.setStatus(StatusEnum.INACTIVE.getCode());
     }
 
@@ -84,7 +85,7 @@ public class StoreService {
         Store store = storeRepository.findByUuidAndStatusAndUserIsNotNull(storeUuid, StatusEnum.INACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Store with uuid: %s not found or is already active.".formatted(storeUuid)));
 
-        Utils.loggedInUserIsOwner(userUuid, store.getUser().getUuid());
+        ownershipAuthorizationService.verifyOwnership(userUuid, store.getUser().getUuid());
         store.setStatus(StatusEnum.ACTIVE.getCode());
     }
 

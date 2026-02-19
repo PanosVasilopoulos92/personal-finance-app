@@ -17,7 +17,7 @@ import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.*;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.repository.*;
-import org.viators.personalfinanceapp.utils.Utils;
+import org.viators.personalfinanceapp.security.OwnershipAuthorizationService;
 
 @Service
 @RequiredArgsConstructor
@@ -30,12 +30,13 @@ public class ItemService {
     private final CategoryRepository categoryRepository;
     private final StoreRepository storeRepository;
     private final PriceObservationRepository priceObservationRepository;
+    private final OwnershipAuthorizationService ownershipAuthorizationService;
 
     public ItemDetailsResponse getItem(String uuid, String loggedInUserUuid) {
         Item item = itemRepository.findByUuidAndStatus(uuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item does not exist"));
 
-        Utils.loggedInUserIsOwner(loggedInUserUuid, item.getUser().getUuid());
+        ownershipAuthorizationService.verifyOwnership(loggedInUserUuid, item.getUser().getUuid());
         return ItemDetailsResponse.from(item);
     }
 
@@ -115,7 +116,7 @@ public class ItemService {
                         userUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Store", "uuid", request.createPriceObservationRequest().storeUuid()));
 
-        Utils.loggedInUserIsOwner(userUuid, item.getUser().getUuid());
+        ownershipAuthorizationService.verifyOwnership(userUuid, item.getUser().getUuid());
 
         PriceObservation lastPriceObservation = priceObservationRepository.findLastActivePriceObservation(item.getUuid(), StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("No active price found for this item"));
@@ -133,7 +134,7 @@ public class ItemService {
         Item item = itemRepository.findByUuidAndStatus(itemUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Item", itemUuid));
 
-        Utils.loggedInUserIsOwner(userUuid, item.getUser().getUuid());
+        ownershipAuthorizationService.verifyOwnership(userUuid, item.getUser().getUuid());
         item.setStatus(StatusEnum.INACTIVE.getCode());
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.viators.personalfinanceapp.model.User;
+import org.viators.personalfinanceapp.model.enums.StatusEnum;
 
 import java.util.Collection;
 import java.util.List;
@@ -37,7 +38,7 @@ public record UserDetailsImpl(User currentUser) implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return StatusEnum.ACTIVE.getCode().equals(currentUser.getStatus());
     }
 
     @Override
