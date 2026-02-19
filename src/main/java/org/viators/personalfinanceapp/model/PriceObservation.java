@@ -8,7 +8,7 @@ import lombok.Setter;
 import org.viators.personalfinanceapp.model.enums.CurrencyEnum;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "price_observations")
@@ -26,7 +26,7 @@ public class PriceObservation extends BaseEntity {
     private CurrencyEnum currency;
 
     @Column(name = "observation_date", nullable = false, updatable = false)
-    private Instant observationDate;
+    private LocalDate observationDate;
 
     @Column(name = "location", nullable = false, updatable = false)
     private String location; // city or region
@@ -34,11 +34,11 @@ public class PriceObservation extends BaseEntity {
     @Column(name = "notes", length = 400)
     private String notes;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false, updatable = false)
     private Item item;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false, updatable = false)
     private Store store;
 }
