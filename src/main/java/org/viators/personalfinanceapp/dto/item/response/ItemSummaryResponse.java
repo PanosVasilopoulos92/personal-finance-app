@@ -1,7 +1,6 @@
 package org.viators.personalfinanceapp.dto.item.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.viators.personalfinanceapp.dto.priceobservation.response.PriceObservationSummaryResponse;
 import org.viators.personalfinanceapp.model.Item;
 
 import java.util.List;
@@ -12,16 +11,16 @@ public record ItemSummaryResponse(
         String name,
 
         @Schema(description = "Item description", example = "Fresh organic whole milk, 1L carton")
-        String description,
+        String description
 
-        @Schema(description = "Price observations recorded for this item")
-        List<PriceObservationSummaryResponse> priceObservationSummaryResponse
 ){
     public static ItemSummaryResponse from(Item item) {
+        if (item == null) {
+            return null;
+        }
         return new ItemSummaryResponse(
                 item.getName(),
-                item.getDescription(),
-                PriceObservationSummaryResponse.listOfSummaries(item.getPriceObservations())
+                item.getDescription()
         );
     }
 

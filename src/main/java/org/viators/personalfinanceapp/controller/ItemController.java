@@ -24,7 +24,10 @@ import org.viators.personalfinanceapp.dto.item.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemRequest;
 import org.viators.personalfinanceapp.dto.item.response.ItemDetailsResponse;
 import org.viators.personalfinanceapp.dto.item.response.ItemSummaryResponse;
+import org.viators.personalfinanceapp.dto.priceobservation.response.PriceObservationSummaryResponse;
 import org.viators.personalfinanceapp.service.ItemService;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/v1/items")
@@ -117,5 +120,16 @@ public class ItemController {
                                                @PathVariable("uuid") String itemUuid) {
         itemService.deactivateItem(userUuid, itemUuid);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{uuid}/get-price-observations")
+    public ResponseEntity<Page<PriceObservationSummaryResponse>> getPriceObservations(
+            @Parameter(description = "Item UUID")
+            @PathVariable("uuid") String itemUuid,
+            @RequestParam(required = false) LocalDate dateFrom,
+            @RequestParam(required = false) LocalDate dateTo,
+            @PageableDefault Pageable pageable) {
+        Page<PriceObservationSummaryResponse> response = itemService.getAllPriceObservations(itemUuid, dateFrom, dateTo, pageable);
+        return ResponseEntity.ok(response);
     }
 }

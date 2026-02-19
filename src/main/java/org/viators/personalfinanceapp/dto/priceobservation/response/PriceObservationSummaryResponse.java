@@ -1,25 +1,33 @@
 package org.viators.personalfinanceapp.dto.priceobservation.response;
 
+import org.viators.personalfinanceapp.dto.item.response.ItemSummaryResponse;
 import org.viators.personalfinanceapp.dto.store.response.StoreSummaryResponse;
 import org.viators.personalfinanceapp.model.PriceObservation;
 import org.viators.personalfinanceapp.model.enums.CurrencyEnum;
+import org.viators.personalfinanceapp.model.enums.StatusEnum;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 public record PriceObservationSummaryResponse(
         BigDecimal price,
         CurrencyEnum currency,
-        Instant observationDate,
-        StoreSummaryResponse storeSummaryResponse
+        LocalDate observationDate,
+        String location,
+        StatusEnum status,
+        StoreSummaryResponse storeSummary,
+        ItemSummaryResponse itemSummary
 ) {
     public static PriceObservationSummaryResponse from(PriceObservation priceObservation) {
         return new PriceObservationSummaryResponse(
                 priceObservation.getPrice(),
                 priceObservation.getCurrency(),
                 priceObservation.getObservationDate(),
-                StoreSummaryResponse.from(priceObservation.getStore())
+                priceObservation.getLocation(),
+                StatusEnum.getStatusFromCode(priceObservation.getStatus()),
+                StoreSummaryResponse.from(priceObservation.getStore()),
+                ItemSummaryResponse.from(priceObservation.getItem())
         );
     }
 
