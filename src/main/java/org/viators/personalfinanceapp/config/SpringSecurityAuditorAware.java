@@ -14,7 +14,7 @@ public class SpringSecurityAuditorAware implements AuditorAware<String> {
 
         if (authentication == null || !authentication.isAuthenticated() ||
                 authentication.getPrincipal() instanceof String) {
-            return Optional.empty();
+            return Optional.of("system");
         }
 
         UserDetailsImpl principal = (UserDetailsImpl) authentication.getPrincipal();

@@ -33,9 +33,11 @@ public class Category extends BaseEntity {
             joinColumns = @JoinColumn(name = "category_id"),
             inverseJoinColumns = @JoinColumn(name = "item_id")
     )
+    @Builder.Default
     private List<Item> items = new ArrayList<>();
 
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY)
+    @Builder.Default
     private List<InflationReport> inflationReports = new ArrayList<>();
 
     @Override

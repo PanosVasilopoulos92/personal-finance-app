@@ -1,5 +1,6 @@
 package org.viators.personalfinanceapp.dto.item.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import org.viators.personalfinanceapp.dto.category.response.CategorySummaryResponse;
 import org.viators.personalfinanceapp.dto.pricealert.response.PriceAlertSummaryResponse;
 import org.viators.personalfinanceapp.dto.pricecomparison.response.PriceComparisonSummaryResponse;
@@ -8,23 +9,52 @@ import org.viators.personalfinanceapp.dto.user.response.UserSummaryResponse;
 import org.viators.personalfinanceapp.model.Item;
 import org.viators.personalfinanceapp.model.enums.ItemUnitEnum;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Schema(description = "Detailed view of an item including categories, price history, alerts, and comparisons")
 public record ItemDetailsResponse(
+        @Schema(description = "Item UUID", example = "c5d3e2f1-4a6b-7c8d-9e0f-1a2b3c4d5e6f")
         String uuid,
+
+        @Schema(description = "Item name", example = "Organic Whole Milk")
         String name,
+
+        @Schema(description = "Item description", example = "Fresh organic whole milk, 1L carton")
         String description,
+
+        @Schema(description = "Unit of measurement", example = "LITTER")
         ItemUnitEnum itemUnit,
+
+        @Schema(description = "Brand name", example = "Noy-Noy")
         String brand,
+
+        @Schema(description = "Whether the user marked this as a favorite", example = "false")
         boolean isFavorite,
+
+        @Schema(description = "Record status: 1=Active, 0=Inactive", example = "1")
         String status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
+
+        @Schema(description = "When the item was created")
+        Instant createdAt,
+
+        @Schema(description = "When the item was last updated")
+        Instant updatedAt,
+
+        @Schema(description = "Owner of this item")
         UserSummaryResponse user,
+
+        @Schema(description = "Categories this item belongs to")
         List<CategorySummaryResponse> categories,
+
+        @Schema(description = "All recorded price observations")
         List<PriceObservationSummaryResponse> priceObservations,
+
+        @Schema(description = "Active price alerts for this item")
         List<PriceAlertSummaryResponse> priceAlerts,
+
+        @Schema(description = "Price comparisons across stores")
         List<PriceComparisonSummaryResponse> priceComparisons
 ) {
     public static ItemDetailsResponse from(Item item) {

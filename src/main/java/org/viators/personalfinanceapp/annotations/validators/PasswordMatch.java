@@ -25,12 +25,19 @@ public @interface PasswordMatch {
 
     class CreateUserPasswordValidator implements ConstraintValidator<PasswordMatch, CreateUserRequest> {
         @Override
-        public boolean isValid(CreateUserRequest createUserRequest, ConstraintValidatorContext constraintValidatorContext) {
-            if (createUserRequest == null || createUserRequest.password() == null || createUserRequest.confirmPassword() == null) {
+        public boolean isValid(CreateUserRequest req, ConstraintValidatorContext ctx) {
+            if (req == null || req.password() == null || req.confirmPassword() == null) {
                 return true;
             }
 
-            return createUserRequest.password().equals(createUserRequest.confirmPassword());
+            boolean matches = req.password().equals(req.confirmPassword());
+            if (!matches) {
+                ctx.disableDefaultConstraintViolation();
+                ctx.buildConstraintViolationWithTemplate(ctx.getDefaultConstraintMessageTemplate())
+                        .addPropertyNode("confirmPassword")
+                        .addConstraintViolation();
+            }
+            return matches;
         }
     }
 
@@ -40,7 +47,15 @@ public @interface PasswordMatch {
             if (req == null || req.newPassword() == null || req.confirmPassword() == null) {
                 return true;
             }
-            return req.newPassword().equals(req.confirmPassword());
+
+            boolean matches = req.newPassword().equals(req.confirmPassword());
+            if (!matches) {
+                ctx.disableDefaultConstraintViolation();
+                ctx.buildConstraintViolationWithTemplate(ctx.getDefaultConstraintMessageTemplate())
+                        .addPropertyNode("confirmPassword")
+                        .addConstraintViolation();
+            }
+            return matches;
         }
     }
 }
