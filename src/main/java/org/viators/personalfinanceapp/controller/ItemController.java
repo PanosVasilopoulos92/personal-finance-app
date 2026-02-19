@@ -61,6 +61,7 @@ public class ItemController {
     public ResponseEntity<ItemDetailsResponse> getItemWithDetails(@AuthenticationPrincipal(expression = "currentUser.uuid") String loggedInUserUuid,
                                                                   @Parameter(description = "Item UUID", example = "c5d3e2f1-4a6b-7c8d-9e0f-1a2b3c4d5e6f")
                                                                   @PathVariable String uuid) {
+
         return ResponseEntity.ok(itemService.getItem(uuid, loggedInUserUuid));
     }
 
@@ -73,6 +74,7 @@ public class ItemController {
     @ValidatedCreateResponses
     public ResponseEntity<ItemSummaryResponse> create(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
                                                       @RequestBody @Valid CreateItemRequest request) {
+
         ItemSummaryResponse response = itemService.create(userUuid, request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -89,6 +91,7 @@ public class ItemController {
                                                       @Parameter(description = "Item UUID", example = "c5d3e2f1-4a6b-7c8d-9e0f-1a2b3c4d5e6f")
                                                       @PathVariable String uuid,
                                                       @RequestBody @Valid UpdateItemRequest request) {
+
         ItemSummaryResponse response = itemService.update(userUuid, request);
         return ResponseEntity.ok(response);
     }
@@ -104,6 +107,7 @@ public class ItemController {
                                                            @Parameter(description = "Item UUID", example = "c5d3e2f1-4a6b-7c8d-9e0f-1a2b3c4d5e6f")
                                                            @PathVariable("uuid") String itemUuid,
                                                            @RequestBody @Valid UpdateItemPriceRequest request) {
+
         ItemSummaryResponse response = itemService.updatePrice(userUuid, itemUuid, request);
         return ResponseEntity.ok(response);
     }
@@ -118,17 +122,24 @@ public class ItemController {
     public ResponseEntity<Void> deactivateItem(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
                                                @Parameter(description = "Item UUID", example = "c5d3e2f1-4a6b-7c8d-9e0f-1a2b3c4d5e6f")
                                                @PathVariable("uuid") String itemUuid) {
+
         itemService.deactivateItem(userUuid, itemUuid);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{uuid}/get-price-observations")
+    @Operation(
+            summary = "Retrieve all price observation for a specific item",
+            description = "Retrieve all price observation for a specific item"
+    )
+    @ApiResponse(responseCode = "200", description = "Item's price observations successfully retrieved")
     public ResponseEntity<Page<PriceObservationSummaryResponse>> getPriceObservations(
             @Parameter(description = "Item UUID")
             @PathVariable("uuid") String itemUuid,
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo,
             @PageableDefault Pageable pageable) {
+
         Page<PriceObservationSummaryResponse> response = itemService.getAllPriceObservations(itemUuid, dateFrom, dateTo, pageable);
         return ResponseEntity.ok(response);
     }
