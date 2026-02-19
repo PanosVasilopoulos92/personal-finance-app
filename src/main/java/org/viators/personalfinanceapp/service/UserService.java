@@ -13,6 +13,7 @@ import org.viators.personalfinanceapp.dto.user.request.UpdateUserPasswordRequest
 import org.viators.personalfinanceapp.dto.user.request.UpdateUserRequest;
 import org.viators.personalfinanceapp.dto.user.response.UserDetailsResponse;
 import org.viators.personalfinanceapp.dto.user.response.UserSummaryResponse;
+import org.viators.personalfinanceapp.exceptions.BusinessValidationException;
 import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.Item;
@@ -43,7 +44,7 @@ public class UserService {
         }
 
         if (request.age() < 13) {
-            throw new IllegalArgumentException("User must be above 13 years old in order to register.");
+            throw new BusinessValidationException("User must be above 13 years old in order to register.");
         }
 
         User userToRegister = request.toEntity();

@@ -1,6 +1,7 @@
 package org.viators.personalfinanceapp.config.openapi;
 
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -38,7 +39,17 @@ import java.lang.annotation.Target;
         @ApiResponse(
                 responseCode = "404",
                 description = "Referenced resource not found (e.g., store, category)",
-                content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                content = @Content(
+                        schema = @Schema(implementation = ErrorResponse.class),
+                        examples = @ExampleObject(value = """
+                                {
+                                  "status": 404,
+                                  "errorCode": "RESOURCE_NOT_FOUND",
+                                  "message": "Store does not exist",
+                                  "path": "/api/v1/items",
+                                  "timestamp": "2026-01-01T12:00:00Z"
+                                }""")
+                )
         )
 })
 public @interface ValidatedCreateResponses {

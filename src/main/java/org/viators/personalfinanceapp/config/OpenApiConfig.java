@@ -59,7 +59,7 @@ public class OpenApiConfig {
     public GroupedOpenApi authApi() {
         return GroupedOpenApi.builder()
                 .group("1-authentication")
-                .pathsToMatch("/api/v1/auth/**")
+                .pathsToMatch("/api/v1/auth/**", "/api/v1/auth")
                 .build();
     }
 
@@ -70,7 +70,7 @@ public class OpenApiConfig {
     public GroupedOpenApi usersApi() {
         return GroupedOpenApi.builder()
                 .group("2-users")
-                .pathsToMatch("/api/v1/users")
+                .pathsToMatch("/api/v1/users/**", "/api/v1/users")
                 .build();
     }
 
@@ -81,7 +81,7 @@ public class OpenApiConfig {
     public GroupedOpenApi itemsApi() {
         return GroupedOpenApi.builder()
                 .group("3-items")
-                .pathsToMatch("/api/v1/items")
+                .pathsToMatch("/api/v1/items/**", "/api/v1/items")
                 .build();
     }
 
@@ -89,7 +89,7 @@ public class OpenApiConfig {
     public GroupedOpenApi storesApi() {
         return GroupedOpenApi.builder()
                 .group("4-stores")
-                .pathsToMatch("/api/v1/stores")
+                .pathsToMatch("/api/v1/stores/**", "/api/v1/stores")
                 .build();
     }
 
@@ -97,7 +97,7 @@ public class OpenApiConfig {
     public GroupedOpenApi categoriesApi() {
         return GroupedOpenApi.builder()
                 .group("5-categories")
-                .pathsToMatch("/api/v1/categories")
+                .pathsToMatch("/api/v1/categories/**", "/api/v1/categories")
                 .build();
     }
 
@@ -105,7 +105,7 @@ public class OpenApiConfig {
     public GroupedOpenApi shoppingListsApi() {
         return GroupedOpenApi.builder()
                 .group("6-shopping-lists")
-                .pathsToMatch("/api/v1/shopping-lists")
+                .pathsToMatch("/api/v1/shopping-lists/**", "/api/v1/shopping-lists")
                 .build();
     }
 }

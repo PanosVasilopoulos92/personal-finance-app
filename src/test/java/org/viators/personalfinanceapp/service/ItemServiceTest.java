@@ -23,7 +23,7 @@ import org.viators.personalfinanceapp.model.enums.UserRolesEnum;
 import org.viators.personalfinanceapp.repository.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.Instant;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -82,7 +82,7 @@ public class ItemServiceTest {
                 .uuid("770e8400-e29b-41d4-a716-446655440002")
                 .name("Olive Oil")
                 .description("Extra virgin olive oil 1L bottle")
-                .itemUnit(ItemUnitEnum.LITTER)
+                .itemUnit(ItemUnitEnum.LITER)
                 .brand("Minerva")
                 .user(testUser)
                 .isFavorite(false)
@@ -92,7 +92,7 @@ public class ItemServiceTest {
         createPriceObservationRequest = new CreatePriceObservationRequest(
                 new BigDecimal("3.9995342452352325"),
                 CurrencyEnum.EUR,
-                LocalDate.now(),
+                Instant.now(),
                 "Athens, Greece",
                 "Weekly offer price",
                 testItem.getUuid(),
@@ -102,9 +102,8 @@ public class ItemServiceTest {
         createItemRequest = new CreateItemRequest(
                 "Olive Oil",
                 "Extra virgin olive oil 1L bottle",
-                ItemUnitEnum.LITTER,
+                ItemUnitEnum.LITER,
                 "Minerva",
-                "Sklavenitis",
                 createPriceObservationRequest
         );
     }
@@ -114,7 +113,7 @@ public class ItemServiceTest {
         // Arrange
         when(userRepository.findByUuidAndStatus(testUser.getUuid(), StatusEnum.ACTIVE.getCode()))
                 .thenReturn(Optional.of(testUser));
-        when(storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(createItemRequest.storeUuid(), StatusEnum.ACTIVE.getCode(), testUser.getUuid()))
+        when(storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(createPriceObservationRequest.storeUuid(), StatusEnum.ACTIVE.getCode(), testUser.getUuid()))
                 .thenReturn(Optional.of(testStore));
         // Mocks save operation
         when(itemRepository.save(any(Item.class)))
@@ -141,7 +140,7 @@ public class ItemServiceTest {
         // Arrange
         when(userRepository.findByUuidAndStatus(testUser.getUuid(), StatusEnum.ACTIVE.getCode()))
                 .thenReturn(Optional.of(testUser));
-        when(storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(createItemRequest.storeUuid(), StatusEnum.ACTIVE.getCode(), testUser.getUuid()))
+        when(storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(createPriceObservationRequest.storeUuid(), StatusEnum.ACTIVE.getCode(), testUser.getUuid()))
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> itemService.create(testUser.getUuid(), createItemRequest))

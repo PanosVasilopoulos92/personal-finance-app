@@ -50,12 +50,13 @@ public class UserPreferences extends BaseEntity {
     private User user;
 
     // Overloaded constructor
-    public UserPreferences(CurrencyEnum currency, String location, boolean notificationEnabled, boolean emailAlerts) {
+    public UserPreferences(CurrencyEnum currency, String location, boolean notificationEnabled, boolean emailAlerts, LanguageEnum language) {
         super();
         this.currency = currency;
         this.location = location;
         this.notificationEnabled = notificationEnabled;
         this.emailAlerts = emailAlerts;
+        this.language = language;
     }
 
     public static UserPreferences createDefaultPreferences() {
@@ -63,7 +64,8 @@ public class UserPreferences extends BaseEntity {
                 CurrencyEnum.EUR,
                 "",
                 false,
-                false
+                false,
+                LanguageEnum.ENGLISH
         );
     }
 }

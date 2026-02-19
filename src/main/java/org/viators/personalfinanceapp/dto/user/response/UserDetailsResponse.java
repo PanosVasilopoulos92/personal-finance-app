@@ -10,7 +10,7 @@ import org.viators.personalfinanceapp.dto.userpreferences.response.UserPreferenc
 import org.viators.personalfinanceapp.model.User;
 import org.viators.personalfinanceapp.model.enums.UserRolesEnum;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 public record UserDetailsResponse(
@@ -20,7 +20,7 @@ public record UserDetailsResponse(
         String email,
         Boolean isActive,
         UserRolesEnum userRole,
-        LocalDateTime createdAt,
+        Instant createdAt,
         UserPreferencesSummaryResponse userPreferences,
         List<ItemSummaryResponse> items,
         List<CategorySummaryResponse> categories,
