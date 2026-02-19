@@ -15,4 +15,12 @@ public enum StatusEnum {
         this.description = description;
     }
 
+    public static StatusEnum getStatusFromCode(String code) {
+        return switch (code) {
+            case "1" -> StatusEnum.ACTIVE;
+            case "0" -> StatusEnum.INACTIVE;
+            default -> throw new IllegalArgumentException("Not valid status code");
+        };
+    }
+
 }

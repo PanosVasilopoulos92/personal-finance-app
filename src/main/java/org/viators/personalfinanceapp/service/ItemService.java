@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,12 +13,16 @@ import org.viators.personalfinanceapp.dto.item.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemRequest;
 import org.viators.personalfinanceapp.dto.item.response.ItemDetailsResponse;
 import org.viators.personalfinanceapp.dto.item.response.ItemSummaryResponse;
+import org.viators.personalfinanceapp.dto.priceobservation.response.PriceObservationSummaryResponse;
 import org.viators.personalfinanceapp.exceptions.BusinessValidationException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.*;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.repository.*;
+import org.viators.personalfinanceapp.repository.specification.PriceObservationSpecs;
 import org.viators.personalfinanceapp.security.OwnershipAuthorizationService;
+
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -136,5 +141,22 @@ public class ItemService {
 
         ownershipAuthorizationService.verifyOwnership(userUuid, item.getUser().getUuid());
         item.setStatus(StatusEnum.INACTIVE.getCode());
+    }
+
+    public Page<PriceObservationSummaryResponse> getAllPriceObservations(String itemUuid, LocalDate dateFrom,
+                                                                         LocalDate dateTo, Pageable pageable) {
+
+        Specification<PriceObservation> spec = Specification.where(PriceObservationSpecs.hasItemUuid(itemUuid));
+
+        if (dateFrom != null) {
+            spec = spec.and(PriceObservationSpecs.dateFrom(dateFrom));
+        }
+
+        if (dateTo != null) {
+            spec = spec.and(PriceObservationSpecs.dateTo(dateTo));
+        }
+
+        return priceObservationRepository.findAll(spec, pageable)
+                .map(PriceObservationSummaryResponse::from);
     }
 }
