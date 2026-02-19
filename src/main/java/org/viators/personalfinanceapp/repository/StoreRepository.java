@@ -13,9 +13,25 @@ import java.util.Optional;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    Optional<Store> findByUuidAndStatusAndUserIsNullOrUser_Uuid(String uuid, String status, String userUuid);
+    @Query("""
+            select s from Store s
+            where s.uuid = :uuid
+            and s.status = :status
+            and (s.user is null or s.user.uuid = :userUuid)
+            """)
+    Optional<Store> findByUuidAndStatusAndUserIsNullOrUser_Uuid(@Param("uuid") String uuid,
+                                                                @Param("status") String status,
+                                                                @Param("userUuid") String userUuid);
 
-    Optional<Store> findByNameAndStatusAndUserIsNullOrUser_Uuid(String name, String status, String userUuid);
+    @Query("""
+            select s from Store s
+            where s.name = :name
+            and s.status = :status
+            and (s.user is null or s.user.uuid = :userUuid)
+            """)
+    Optional<Store> findByNameAndStatusAndUserIsNullOrUser_Uuid(@Param("name") String name,
+                                                                @Param("status") String status,
+                                                                @Param("userUuid") String userUuid);
 
     Optional<Store> findByUuidAndStatus(String uuid, String status);
 
