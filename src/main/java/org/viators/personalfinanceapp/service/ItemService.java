@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.viators.personalfinanceapp.dto.inflationcalc.response.InflationCalculationResponse;
 import org.viators.personalfinanceapp.dto.item.request.CreateItemRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemRequest;
@@ -17,12 +18,16 @@ import org.viators.personalfinanceapp.dto.priceobservation.response.PriceObserva
 import org.viators.personalfinanceapp.exceptions.BusinessValidationException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.model.*;
+import org.viators.personalfinanceapp.model.enums.CurrencyEnum;
 import org.viators.personalfinanceapp.model.enums.StatusEnum;
 import org.viators.personalfinanceapp.repository.*;
 import org.viators.personalfinanceapp.repository.specification.PriceObservationSpecs;
 import org.viators.personalfinanceapp.security.OwnershipAuthorizationService;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -158,5 +163,41 @@ public class ItemService {
 
         return priceObservationRepository.findAll(spec, pageable)
                 .map(PriceObservationSummaryResponse::from);
+    }
+
+    public InflationCalculationResponse calculateInflation(String userUuid, String itemUuid, CurrencyEnum currency, LocalDate startDate, LocalDate endDate) {
+
+        if (startDate.isAfter(endDate) || startDate.isAfter(LocalDate.now())) {
+            throw new BusinessValidationException("Invalid date range provided");
+        }
+
+        Item item = itemRepository.findByUuidAndUser_Uuid(itemUuid, userUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Item", "uuid", itemUuid));
+
+        List<PriceObservation> priceObservationsForDateRange = priceObservationRepository.findPriceObsForInflationCalc(
+                item.getUuid(), currency, startDate, endDate);
+
+        if (priceObservationsForDateRange.size() < 2) {
+            return InflationCalculationResponse.insufficientData();
+        }
+
+        BigDecimal startPrice = priceObservationsForDateRange.getFirst().getPrice();
+        BigDecimal endPrice = priceObservationsForDateRange.getLast().getPrice();
+        BigDecimal absolutePriceChange = endPrice.subtract(startPrice);
+        BigDecimal inflationRate = endPrice.subtract(startPrice)
+                .divide(startPrice, 10, RoundingMode.HALF_EVEN)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(2, RoundingMode.HALF_UP);
+
+        return new InflationCalculationResponse(
+                startPrice,
+                endPrice,
+                startDate,
+                endDate,
+                inflationRate,
+                absolutePriceChange,
+                currency,
+                null
+        );
     }
 }

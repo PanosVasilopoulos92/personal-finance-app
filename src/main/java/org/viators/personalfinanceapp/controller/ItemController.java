@@ -19,12 +19,14 @@ import org.springframework.web.bind.annotation.*;
 import org.viators.personalfinanceapp.config.openapi.OwnerProtectedReadResponses;
 import org.viators.personalfinanceapp.config.openapi.OwnerProtectedWriteResponses;
 import org.viators.personalfinanceapp.config.openapi.ValidatedCreateResponses;
+import org.viators.personalfinanceapp.dto.inflationcalc.response.InflationCalculationResponse;
 import org.viators.personalfinanceapp.dto.item.request.CreateItemRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.dto.item.request.UpdateItemRequest;
 import org.viators.personalfinanceapp.dto.item.response.ItemDetailsResponse;
 import org.viators.personalfinanceapp.dto.item.response.ItemSummaryResponse;
 import org.viators.personalfinanceapp.dto.priceobservation.response.PriceObservationSummaryResponse;
+import org.viators.personalfinanceapp.model.enums.CurrencyEnum;
 import org.viators.personalfinanceapp.service.ItemService;
 
 import java.time.LocalDate;
@@ -141,6 +143,17 @@ public class ItemController {
             @PageableDefault Pageable pageable) {
 
         Page<PriceObservationSummaryResponse> response = itemService.getAllPriceObservations(itemUuid, dateFrom, dateTo, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{uuid}/calculate-inflation")
+    public ResponseEntity<InflationCalculationResponse> calculateItemInflationForDateRange(
+            @AuthenticationPrincipal(expression = "currentUser.uuid") String loggedInUserUuid,
+            @PathVariable("uuid") String itemUuid,
+            @RequestParam CurrencyEnum currency,
+            @RequestParam LocalDate from,
+            @RequestParam LocalDate to) {
+        InflationCalculationResponse response = itemService.calculateInflation(loggedInUserUuid, itemUuid, currency, from, to);
         return ResponseEntity.ok(response);
     }
 }
