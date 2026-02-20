@@ -6,7 +6,7 @@ import org.viators.personalfinanceapp.model.PriceObservation;
 import org.viators.personalfinanceapp.model.enums.CurrencyEnum;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Schema(description = "Price observation data — records a price seen at a specific store and time")
@@ -23,9 +23,9 @@ public record CreatePriceObservationRequest(
 
         @NotNull(message = "Date of observation is required")
         @PastOrPresent(message = "Observation date cannot be in the future")
-        @Schema(description = "When the price was observed (ISO-8601 instant)",
+        @Schema(description = "When the price was observed",
                 example = "2026-02-18T10:30:00Z")
-        Instant observationDate,
+        LocalDate observationDate,
 
         @NotBlank(message = "Location is required")
         @Size(max = 100, message = "Location must not exceed 100 characters")
