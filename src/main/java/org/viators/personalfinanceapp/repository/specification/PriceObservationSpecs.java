@@ -2,6 +2,8 @@ package org.viators.personalfinanceapp.repository.specification;
 
 import org.springframework.data.jpa.domain.Specification;
 import org.viators.personalfinanceapp.model.PriceObservation;
+import org.viators.personalfinanceapp.model.enums.CurrencyEnum;
+import org.viators.personalfinanceapp.model.enums.StoreTypeEnum;
 
 import java.time.LocalDate;
 
@@ -23,4 +25,25 @@ public class PriceObservationSpecs {
         return ((root, query, cb) ->
                 cb.lessThanOrEqualTo(root.get("observationDate"), dateTo));
     }
+
+    public static Specification<PriceObservation> hasStoreUuid(String storeUuid) {
+        return (root, query, cb) ->
+                cb.equal(root.get("store").get("uuid"), storeUuid);
+    }
+
+    public static Specification<PriceObservation> hasStoreType(StoreTypeEnum storeType) {
+        return (root, query, cb) ->
+                cb.equal(root.get("store").get("storeType"), storeType);
+    }
+
+    public static Specification<PriceObservation> inCity(String city) {
+        return (root, query, cb) ->
+                cb.equal(root.get("store").get("city"), city);
+    }
+
+    public static Specification<PriceObservation> hasCurrency(CurrencyEnum currency) {
+        return (root, query, cb) ->
+                cb.equal(root.get("currency"), currency);
+    }
+
 }
