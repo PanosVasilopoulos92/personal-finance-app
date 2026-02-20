@@ -10,7 +10,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.viators.personalfinanceapp.model.PriceObservation;
+import org.viators.personalfinanceapp.model.enums.CurrencyEnum;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -31,4 +34,15 @@ public interface PriceObservationRepository extends JpaRepository<PriceObservati
     Optional<PriceObservation> findLastActivePriceObservation(@Param("uuid") String uuid,
                                                               @Param("status") String status);
 
+    @Query("""
+            select po from PriceObservation po
+            where po.item.uuid = :itemUuid
+            and po.currency = :currency
+            and po.observationDate between :startDate and :endDate
+            order by po.observationDate asc
+            """)
+    List<PriceObservation> findPriceObsForInflationCalc(@Param("itemUuid") String itemUuid,
+                                                        @Param("currency") CurrencyEnum currency,
+                                                        @Param("startDate")LocalDate startDate,
+                                                        @Param("endDate") LocalDate endDate);
 }
