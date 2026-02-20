@@ -8,6 +8,9 @@ spring:
   # Database configuration is now in profile-specific files:
   # - application-mysql.yml
   # - application-postgres.yml
+  threads:
+    virtual:
+      enabled: true
 
   data:
     web:
@@ -35,3 +38,11 @@ springdoc:
   default-flat-param-object: true   # This tells SpringDoc to automatically explode Pageable into page, size, sort query params without needing @ParameterObject on every method
   default-produces-media-type: application/json
   default-consumes-media-type: application/json
+
+logging:
+  file:
+    name: logs/finance-app.log
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      max-history: 30
