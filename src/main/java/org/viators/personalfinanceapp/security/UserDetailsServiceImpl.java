@@ -5,8 +5,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.viators.personalfinanceapp.model.User;
-import org.viators.personalfinanceapp.repository.UserRepository;
+import org.viators.personalfinanceapp.user.User;
+import org.viators.personalfinanceapp.user.UserRepository;
 
 @Service
 @RequiredArgsConstructor
