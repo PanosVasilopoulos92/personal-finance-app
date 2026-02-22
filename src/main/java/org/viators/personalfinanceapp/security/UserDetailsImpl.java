@@ -5,8 +5,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import org.springframework.security.core.userdetails.UserDetails;
-import org.viators.personalfinanceapp.model.User;
-import org.viators.personalfinanceapp.model.enums.StatusEnum;
+import org.viators.personalfinanceapp.user.User;
+import org.viators.personalfinanceapp.common.enums.StatusEnum;
 
 import java.util.Collection;
 import java.util.List;
