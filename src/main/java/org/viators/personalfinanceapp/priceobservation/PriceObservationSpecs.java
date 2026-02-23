@@ -1,6 +1,8 @@
 package org.viators.personalfinanceapp.priceobservation;
 
 import org.springframework.data.jpa.domain.Specification;
+import org.viators.personalfinanceapp.common.enums.CurrencyEnum;
+import org.viators.personalfinanceapp.common.enums.StoreTypeEnum;
 
 import java.time.LocalDate;
 

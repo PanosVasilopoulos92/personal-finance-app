@@ -1,4 +1,4 @@
-package org.viators.personalfinanceapp.repository.specification;
+package org.viators.personalfinanceapp.priceobservation;
 
 import jakarta.persistence.criteria.From;
 import jakarta.persistence.criteria.Join;
@@ -6,8 +6,7 @@ import jakarta.persistence.criteria.JoinType;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
-import org.viators.personalfinanceapp.model.Item;
-import org.viators.personalfinanceapp.model.PriceObservation;
+import org.viators.personalfinanceapp.item.Item;
 
 import java.math.BigDecimal;
 
