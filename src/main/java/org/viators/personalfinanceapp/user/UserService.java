@@ -126,7 +126,7 @@ public class UserService {
     }
 
     public Page<ItemSummaryResponse> getAllItemsForUser(String userUuid, Pageable pageable) {
-        Page<Item> results = itemRepository.findAllByUser(userUuid, StatusEnum.ACTIVE.getCode(), pageable);
+        Page<Item> results = itemRepository.findAllByUser_UuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode(), pageable);
 
         return results.map(ItemSummaryResponse::from);
     }
