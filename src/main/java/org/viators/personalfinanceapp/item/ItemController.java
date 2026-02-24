@@ -21,6 +21,7 @@ import org.viators.personalfinanceapp.config.openapi.OwnerProtectedWriteResponse
 import org.viators.personalfinanceapp.config.openapi.ValidatedCreateResponses;
 import org.viators.personalfinanceapp.inflationcalc.dto.response.InflationCalculationResponse;
 import org.viators.personalfinanceapp.item.dto.request.CreateItemRequest;
+import org.viators.personalfinanceapp.item.dto.request.ItemSearchFilterRequest;
 import org.viators.personalfinanceapp.item.dto.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.item.dto.request.UpdateItemRequest;
 import org.viators.personalfinanceapp.item.dto.response.ItemDetailsResponse;
@@ -48,6 +49,20 @@ public class ItemController {
                                                               @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
 
         Page<ItemSummaryResponse> response = itemService.getItems(loggedInUserUuid, pageable);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/search")
+    @Operation(
+            summary = "Search and filter items",
+            description = "Returns a paginated list of the authenticated user's items filtered by name keyword and/or status.")
+    @ApiResponse(responseCode = "200", description = "Items retrieved successfully")
+    public ResponseEntity<Page<ItemSummaryResponse>> searchItems(
+            @AuthenticationPrincipal(expression = "currentUser.uuid") String loggedInUserUuid,
+            @ModelAttribute ItemSearchFilterRequest filter,
+            @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+
+        Page<ItemSummaryResponse> response = itemService.searchItems(loggedInUserUuid, filter, pageable);
         return ResponseEntity.ok(response);
     }
 
