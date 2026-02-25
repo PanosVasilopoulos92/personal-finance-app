@@ -42,6 +42,6 @@ public interface ShoppingListItemRepository extends JpaRepository<ShoppingListIt
         join sli.shoppingList sl
         where sl.uuid = :slUuid
         and sli.shoppingList.uuid = :slUuid
-""")
+        """)
     public List<Long> findAllByShoppingList(String slUuid);
 }

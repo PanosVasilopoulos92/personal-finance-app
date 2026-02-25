@@ -42,6 +42,7 @@ public class StoreController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/search")
     public ResponseEntity<Page<StoreSummaryResponse>> getStoresBasedOnFilters(@AuthenticationPrincipal(expression = "currentUser.uuid") String loggedInUserUuid,
                                                                         @Valid @ModelAttribute StoreFilterRequest request,
                                                                         @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)

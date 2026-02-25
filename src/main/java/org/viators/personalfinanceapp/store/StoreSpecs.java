@@ -34,7 +34,7 @@ public class StoreSpecs {
     public static Specification<Store> nameContaining(String nameKeyword) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.like(criteriaBuilder.lower(root.get("name")),
-                        "%s".concat(nameKeyword.toLowerCase()).concat("%"));
+                        "%".concat(nameKeyword.toLowerCase()).concat("%"));
     }
 
     public static Specification<Store> hasWebsite() {

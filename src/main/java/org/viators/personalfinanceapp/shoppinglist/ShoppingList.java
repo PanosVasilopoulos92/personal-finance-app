@@ -38,7 +38,7 @@ public class ShoppingList extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false, updatable = false)
     private User user;
 
-    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "shoppingList", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<ShoppingListItem> shoppingListItems = new ArrayList<>();
 
     public void addShoppingListItem(ShoppingListItem item) {

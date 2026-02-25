@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.viators.personalfinanceapp.item.ItemService;
 import org.viators.personalfinanceapp.item.dto.response.ItemSummaryResponse;
 import org.viators.personalfinanceapp.user.dto.request.CreateUserRequest;
 import org.viators.personalfinanceapp.user.dto.request.UpdateUserRequest;
@@ -24,6 +25,7 @@ import org.viators.personalfinanceapp.user.dto.response.UserSummaryResponse;
 public class UserController {
 
     private final UserService userService;
+    private final ItemService itemService;
 
     @GetMapping
     public ResponseEntity<Page<UserSummaryResponse>> getUsers(@PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
@@ -66,6 +68,6 @@ public class UserController {
     @GetMapping("/{uuid}/items")
     public ResponseEntity<Page<ItemSummaryResponse>> getAllItems(@PathVariable String uuid,
                                                                  @PageableDefault()Pageable pageable) {
-        return ResponseEntity.ok(userService.getAllItemsForUser(uuid, pageable));
+        return ResponseEntity.ok(itemService.getAllItemsForUser(uuid, pageable));
     }
 }

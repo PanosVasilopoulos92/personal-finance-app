@@ -7,19 +7,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.viators.personalfinanceapp.item.dto.response.ItemSummaryResponse;
+import org.viators.personalfinanceapp.common.enums.StatusEnum;
+import org.viators.personalfinanceapp.exceptions.BusinessValidationException;
+import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
+import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.user.dto.request.CreateUserRequest;
 import org.viators.personalfinanceapp.user.dto.request.UpdateUserPasswordRequest;
 import org.viators.personalfinanceapp.user.dto.request.UpdateUserRequest;
 import org.viators.personalfinanceapp.user.dto.response.UserDetailsResponse;
 import org.viators.personalfinanceapp.user.dto.response.UserSummaryResponse;
-import org.viators.personalfinanceapp.exceptions.BusinessValidationException;
-import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
-import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
-import org.viators.personalfinanceapp.item.Item;
 import org.viators.personalfinanceapp.userpreferences.UserPreferences;
-import org.viators.personalfinanceapp.common.enums.StatusEnum;
-import org.viators.personalfinanceapp.item.ItemRepository;
 
 @Service
 @RequiredArgsConstructor // used for DI
@@ -27,8 +24,9 @@ import org.viators.personalfinanceapp.item.ItemRepository;
 public class UserService {
 
     private final UserRepository userRepository;
+
+    // Other Dependencies
     private final PasswordEncoder passwordEncoder;
-    private final ItemRepository itemRepository;
 
     @Transactional
     public UserSummaryResponse registerUser(CreateUserRequest request) {
@@ -125,10 +123,8 @@ public class UserService {
         return UserSummaryResponse.from(result);
     }
 
-    public Page<ItemSummaryResponse> getAllItemsForUser(String userUuid, Pageable pageable) {
-        Page<Item> results = itemRepository.findAllByUser_UuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode(), pageable);
-
-        return results.map(ItemSummaryResponse::from);
+    public User findActiveUser(String userUuid) {
+        return userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "uuid", userUuid));
     }
-
 }
