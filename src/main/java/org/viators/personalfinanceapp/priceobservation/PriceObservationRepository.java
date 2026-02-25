@@ -27,8 +27,6 @@ public interface PriceObservationRepository extends JpaRepository<PriceObservati
             select po from PriceObservation po
             where po.item.uuid = :uuid
             and po.status = :status
-            order by po.createdAt desc
-            limit 1
             """)
     Optional<PriceObservation> findLastActivePriceObservation(@Param("uuid") String uuid,
                                                               @Param("status") String status);
@@ -40,8 +38,8 @@ public interface PriceObservationRepository extends JpaRepository<PriceObservati
             and po.observationDate between :startDate and :endDate
             order by po.observationDate asc
             """)
-    List<PriceObservation> findPriceObsForInflationCalc(@Param("itemUuid") String itemUuid,
-                                                        @Param("currency") CurrencyEnum currency,
-                                                        @Param("startDate")LocalDate startDate,
-                                                        @Param("endDate") LocalDate endDate);
+    List<PriceObservation> getAllPricesForItemBasedOnCurrencyAndDateRange(@Param("itemUuid") String itemUuid,
+                                                                          @Param("currency") CurrencyEnum currency,
+                                                                          @Param("startDate")LocalDate startDate,
+                                                                          @Param("endDate") LocalDate endDate);
 }

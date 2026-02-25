@@ -10,14 +10,14 @@ import org.viators.personalfinanceapp.category.dto.request.CreateCategoryRequest
 import org.viators.personalfinanceapp.category.dto.request.UpdateCategoryRequest;
 import org.viators.personalfinanceapp.category.dto.response.CategoryDetailsResponse;
 import org.viators.personalfinanceapp.category.dto.response.CategorySummaryResponse;
+import org.viators.personalfinanceapp.common.enums.StatusEnum;
 import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
 import org.viators.personalfinanceapp.exceptions.InvalidStateException;
 import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.item.Item;
+import org.viators.personalfinanceapp.item.ItemService;
 import org.viators.personalfinanceapp.user.User;
-import org.viators.personalfinanceapp.common.enums.StatusEnum;
-import org.viators.personalfinanceapp.item.ItemRepository;
-import org.viators.personalfinanceapp.user.UserRepository;
+import org.viators.personalfinanceapp.user.UserService;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +26,14 @@ import org.viators.personalfinanceapp.user.UserRepository;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
-    private final UserRepository userRepository;
-    private final ItemRepository itemRepository;
+    private final UserService userService;
+    private final ItemService itemService;
+
+
+    public Category getActiveCategory(String categoryUuid) {
+        return categoryRepository.findByUuidAndStatus(categoryUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Category", "uuid", categoryUuid));
+    }
 
     public CategoryDetailsResponse getCategoryWithDetails(String userUuid, String categoryUuid) {
         Category result = categoryRepository.findCategoryWithRelationships(userUuid, categoryUuid)
@@ -57,11 +63,8 @@ public class CategoryService {
             throw new DuplicateResourceException("Category", "name", request.name());
         }
 
-        User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist or is inactive"));
-
+        User user = userService.findActiveUser(userUuid);
         Category categoryToCreate = request.toEntity();
-
         categoryToCreate.addUser(user);
 
         categoryRepository.save(categoryToCreate);
@@ -94,8 +97,7 @@ public class CategoryService {
         Category category = categoryRepository.findByUuidAndUser_Uuid(categoryUuid, userUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("No category exist with this uuid"));
 
-        Item item = itemRepository.findByUuidAndUser_Uuid(itemUuid, userUuid)
-                .orElseThrow(() -> new ResourceNotFoundException("No such item exist"));
+        Item item = itemService.getItemByUuidAndUser(itemUuid, userUuid);
 
         if (category.getItems().contains(item)) {
             throw  new DuplicateResourceException("Category already contains this item");
@@ -109,8 +111,7 @@ public class CategoryService {
         Category category = categoryRepository.findByUuidAndUser_Uuid(categoryUuid, userUuid)
                 .orElseThrow(() -> new ResourceNotFoundException("No category exist with this uuid"));
 
-        Item item = itemRepository.findByUuidAndUser_Uuid(itemUuid, userUuid)
-                .orElseThrow(() -> new ResourceNotFoundException("No such item exist"));
+        Item item = itemService.getItemByUuidAndUser(itemUuid, userUuid);
 
         if (!category.getItems().contains(item)) {
             throw  new InvalidStateException("Item does not exists in this category");

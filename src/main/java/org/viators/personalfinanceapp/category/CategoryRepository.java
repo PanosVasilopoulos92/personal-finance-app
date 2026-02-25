@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -15,13 +14,13 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Optional<Category> findByUuid(String uuid);
 
+    Optional<Category> findByUuidAndStatus(String uuid, String status);
+
     Optional<Category> findByUuidAndUser_Uuid(String categoryUuid, String userUuid);
 
     Optional<Category> findByUuidAndUser_UuidAndStatus(String uuid, String userUuid, String status);
 
     boolean existsByNameAndUser_UuidAndStatus(String name, String uuid, String status);
-
-    List<Category> findByUser(Long userId);
 
     Page<Category> findByUser_Uuid(String userUuid, Pageable pageable);
 
