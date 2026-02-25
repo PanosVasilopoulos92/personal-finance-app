@@ -4,13 +4,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
+import org.viators.personalfinanceapp.store.Store;
+import org.viators.personalfinanceapp.store.StoreService;
 import org.viators.personalfinanceapp.userpreferences.dto.request.UpdatePreferredStoresRequest;
 import org.viators.personalfinanceapp.userpreferences.dto.request.UpdateUserPrefRequest;
 import org.viators.personalfinanceapp.userpreferences.dto.response.UserPreferencesSummaryResponse;
-import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
-import org.viators.personalfinanceapp.store.Store;
-import org.viators.personalfinanceapp.common.enums.StatusEnum;
-import org.viators.personalfinanceapp.store.StoreRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +18,9 @@ import org.viators.personalfinanceapp.store.StoreRepository;
 public class UserPreferencesService {
 
     private final UserPreferencesRepository userPreferencesRepository;
-    private final StoreRepository storeRepository;
+
+    // Other Service dependencies
+    private final StoreService storeService;
 
     public UserPreferencesSummaryResponse getPreferences(String uuid) {
         UserPreferences userPreferences = userPreferencesRepository.findByUser_Uuid(uuid)
@@ -51,8 +52,7 @@ public class UserPreferencesService {
         UserPreferences userPreferences = userPreferencesRepository.findByUser_Uuid(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("No user found with this uuid"));
 
-        Store storeToUpdate = storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(request.uuid(), StatusEnum.ACTIVE.getCode(), userUuid)
-                .orElseThrow(() -> new ResourceNotFoundException("No store found with this uuid"));
+        Store storeToUpdate = storeService.getActiveStoreThatIsGlobalOrBelongsToUser(request.uuid(), userUuid);
 
         if (userPreferences.getPreferredStores().contains(storeToUpdate)) {
             userPreferences.getPreferredStores().remove(storeToUpdate);

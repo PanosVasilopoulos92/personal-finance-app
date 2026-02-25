@@ -7,17 +7,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.viators.personalfinanceapp.common.enums.StatusEnum;
+import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
+import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
+import org.viators.personalfinanceapp.security.OwnershipAuthorizationService;
 import org.viators.personalfinanceapp.store.dto.request.CreateStoreRequest;
 import org.viators.personalfinanceapp.store.dto.request.StoreFilterRequest;
 import org.viators.personalfinanceapp.store.dto.request.UpdateStoreRequest;
 import org.viators.personalfinanceapp.store.dto.response.StoreDetailsResponse;
 import org.viators.personalfinanceapp.store.dto.response.StoreSummaryResponse;
-import org.viators.personalfinanceapp.exceptions.DuplicateResourceException;
-import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.user.User;
-import org.viators.personalfinanceapp.common.enums.StatusEnum;
-import org.viators.personalfinanceapp.user.UserRepository;
-import org.viators.personalfinanceapp.security.OwnershipAuthorizationService;
+import org.viators.personalfinanceapp.user.UserService;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +26,17 @@ import org.viators.personalfinanceapp.security.OwnershipAuthorizationService;
 public class StoreService {
 
     private final StoreRepository storeRepository;
-    private final UserRepository userRepository;
+
+    // Other Service Dependencies
+    private final UserService userService;
     private final OwnershipAuthorizationService ownershipAuthorizationService;
+
+    public Store getActiveStoreThatIsGlobalOrBelongsToUser(String storeUuid, String loggedInUserUuid) {
+        return storeRepository.findByUuidAndStatusAndUserIsNullOrUser_Uuid(storeUuid,
+                        StatusEnum.ACTIVE.getCode(),
+                        loggedInUserUuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Store was not found for this user"));
+    }
 
     public Page<StoreSummaryResponse> getStores(String userUuid, Pageable pageable) {
         Page<Store> stores = storeRepository.findAllAvailableStoresForUser(StatusEnum.ACTIVE.getCode(), userUuid, pageable);
@@ -44,8 +53,7 @@ public class StoreService {
 
     @Transactional
     public StoreSummaryResponse create(String userUuid, CreateStoreRequest request) {
-        User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("User", userUuid));
+        User user = userService.findActiveUser(userUuid);
 
         if (storeRepository.existsByNameIgnoreCaseAndStatusAndUserIsNotNullAndUser_Uuid(request.name(),
                 StatusEnum.ACTIVE.getCode(), userUuid)) {

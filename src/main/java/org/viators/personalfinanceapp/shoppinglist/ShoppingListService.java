@@ -6,16 +6,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.viators.personalfinanceapp.common.enums.StatusEnum;
+import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.shoppinglist.dto.request.CreateShoppingListRequest;
 import org.viators.personalfinanceapp.shoppinglist.dto.request.UpdateShoppingListRequest;
 import org.viators.personalfinanceapp.shoppinglist.dto.response.ShoppingListDetailsResponse;
 import org.viators.personalfinanceapp.shoppinglist.dto.response.ShoppingListSummaryResponse;
-import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.shoppinglistitem.ShoppingListItem;
+import org.viators.personalfinanceapp.shoppinglistitem.ShoppingListItemService;
 import org.viators.personalfinanceapp.user.User;
-import org.viators.personalfinanceapp.common.enums.StatusEnum;
-import org.viators.personalfinanceapp.shoppinglistitem.ShoppingListItemRepository;
-import org.viators.personalfinanceapp.user.UserRepository;
+import org.viators.personalfinanceapp.user.UserService;
 
 @Service
 @Slf4j
@@ -23,14 +23,21 @@ import org.viators.personalfinanceapp.user.UserRepository;
 @Transactional(readOnly = true)
 public class ShoppingListService {
 
-    private final UserRepository userRepository;
     private final ShoppingListRepository shoppingListRepository;
-    private final ShoppingListItemRepository shoppingListItemRepository;
+
+    // Other Service dependencies
+    private final UserService userService;
+    private final ShoppingListItemService shoppingListItemService;
+
+
+    public ShoppingList getActiveShoppingList(String shoppingListUuid) {
+        return shoppingListRepository.findByUuidAndStatus(shoppingListUuid, StatusEnum.ACTIVE.getCode())
+                .orElseThrow(() -> new ResourceNotFoundException("ShoppingList", "uuid", shoppingListUuid));
+    }
 
     @Transactional
     public ShoppingListSummaryResponse create(String userUuid, CreateShoppingListRequest request) {
-        User user = userRepository.findByUuidAndStatus(userUuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("User does not exist system"));
+        User user = userService.findActiveUser(userUuid);
 
         ShoppingList shoppingList = request.toEntity();
         shoppingList = shoppingListRepository.save(shoppingList);
@@ -51,8 +58,7 @@ public class ShoppingListService {
         ShoppingList shoppingList = shoppingListRepository.findByUuidAndStatus(shoppingListUuid, StatusEnum.ACTIVE.getCode())
                 .orElseThrow(() -> new ResourceNotFoundException("Shopping list not found"));
 
-        ShoppingListItem shoppingListItem = shoppingListItemRepository.findByUuidAndStatus(shoppingListItemUuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Shopping list item not found"));
+        ShoppingListItem shoppingListItem = shoppingListItemService.getActiveShoppingListItem(shoppingListItemUuid);
 
         shoppingList.addShoppingListItem(shoppingListItem);
         return ShoppingListSummaryResponse.from(shoppingList);
@@ -61,17 +67,12 @@ public class ShoppingListService {
     @Transactional
     public void removeShoppingListItemFromList(String shoppingListUuid, String shoppingListItemUuid) {
         ShoppingList shoppingList = shoppingListRepository.findByUuidAndStatus(shoppingListUuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Shopping list not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("ShoppingList", "uuid", shoppingListUuid));
 
-        ShoppingListItem shoppingListItem = shoppingListItemRepository.findByUuidAndStatus(shoppingListItemUuid, StatusEnum.ACTIVE.getCode())
-                .orElseThrow(() -> new ResourceNotFoundException("Shopping list item not found"));
+        ShoppingListItem shoppingListItem = shoppingListItemService.getActiveShoppingListItem(shoppingListItemUuid);
 
-        if (!shoppingListItemRepository.findAllByShoppingList(shoppingListUuid).contains(shoppingListItem.getId())) {
-//            throw new BusinessException("Shopping item does not exist in this shopping list");
-        }
-
+        shoppingListItemService.checkSLIExistInShoppingList(shoppingListUuid, shoppingListItem.getId());
         shoppingList.removeShoppingListItem(shoppingListItem);
-        shoppingListItemRepository.delete(shoppingListItem);
     }
 
     @Transactional
@@ -80,6 +81,8 @@ public class ShoppingListService {
                 .orElseThrow(() -> new ResourceNotFoundException("Shopping list not found or is already deactivated"));
 
         shoppingList.setStatus(StatusEnum.INACTIVE.getCode());
+        shoppingList.getShoppingListItems()
+                .forEach(sli -> sli.setStatus(StatusEnum.INACTIVE.getCode()));
     }
 
     public ShoppingListDetailsResponse getShoppingList(String userUuid, String shopListUuid) {
