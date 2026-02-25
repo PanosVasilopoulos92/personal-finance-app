@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.viators.personalfinanceapp.store.dto.request.CreateStoreRequest;
+import org.viators.personalfinanceapp.store.dto.request.StoreFilterRequest;
 import org.viators.personalfinanceapp.store.dto.request.UpdateStoreRequest;
 import org.viators.personalfinanceapp.store.dto.response.StoreDetailsResponse;
 import org.viators.personalfinanceapp.store.dto.response.StoreSummaryResponse;
@@ -97,4 +99,38 @@ public class StoreService {
         storeRepository.delete(store);
     }
 
+    public Page<StoreSummaryResponse> getStoresBasedOnFilters(String userUuid, StoreFilterRequest filter, Pageable pageable) {
+        Specification<Store> specs = Specification.where(StoreSpecs.belongsToUser(userUuid));
+
+        if (filter.storeType() != null) {
+            specs = specs.and(StoreSpecs.hasStoreType(filter.storeType()));
+        }
+
+        if (filter.inCity() != null) {
+            specs = specs.and(StoreSpecs.inCity(filter.inCity()));
+        }
+
+        if (filter.inCountry() != null) {
+            specs = specs.and(StoreSpecs.inCountry(filter.inCountry()));
+        }
+
+        if (filter.nameContains() != null && !filter.nameContains().isBlank()) {
+            specs = specs.and(StoreSpecs.nameContaining(filter.nameContains()));
+        }
+
+        if (filter.hasWebsite() != null) {
+            specs = specs.and(StoreSpecs.hasWebsite());
+        }
+
+        if (filter.status() != null) {
+            specs = specs.and(StoreSpecs.hasStatus(filter.status()));
+        }
+
+        if (filter.locationContains() != null && !filter.locationContains().isBlank()) {
+            specs = specs.and(StoreSpecs.locationContains(filter.locationContains()));
+        }
+
+        return storeRepository.findAll(specs, pageable)
+                .map(StoreSummaryResponse::from);
+    }
 }

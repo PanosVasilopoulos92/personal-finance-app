@@ -149,14 +149,14 @@ public class ItemController {
             description = "Retrieve all price observation for a specific item"
     )
     @ApiResponse(responseCode = "200", description = "Item's price observations successfully retrieved")
-    public ResponseEntity<Page<PriceObservationSummaryResponse>> getPriceObservations(
+    public ResponseEntity<Page<PriceObservationSummaryResponse>> getPriceObservationsWithDateRange(
             @Parameter(description = "Item UUID")
             @PathVariable("uuid") String itemUuid,
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo,
             @PageableDefault Pageable pageable) {
 
-        Page<PriceObservationSummaryResponse> response = itemService.getAllPriceObservations(itemUuid, dateFrom, dateTo, pageable);
+        Page<PriceObservationSummaryResponse> response = itemService.getPriceObservationsWithDateRange(itemUuid, dateFrom, dateTo, pageable);
         return ResponseEntity.ok(response);
     }
 

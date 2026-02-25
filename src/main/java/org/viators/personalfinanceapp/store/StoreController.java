@@ -13,6 +13,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.viators.personalfinanceapp.store.dto.request.CreateStoreRequest;
+import org.viators.personalfinanceapp.store.dto.request.StoreFilterRequest;
 import org.viators.personalfinanceapp.store.dto.request.UpdateStoreRequest;
 import org.viators.personalfinanceapp.store.dto.response.StoreDetailsResponse;
 import org.viators.personalfinanceapp.store.dto.response.StoreSummaryResponse;
@@ -36,8 +37,17 @@ public class StoreController {
 
     @GetMapping("/{storeUuid}")
     public ResponseEntity<StoreDetailsResponse> getStore(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
-                                                         @PathVariable("storeUuid") String storeUuid) {
+                                                         @PathVariable String storeUuid) {
         StoreDetailsResponse response = storeService.getStore(userUuid, storeUuid);
+        return ResponseEntity.ok(response);
+    }
+
+    public ResponseEntity<Page<StoreSummaryResponse>> getStoresBasedOnFilters(@AuthenticationPrincipal(expression = "currentUser.uuid") String loggedInUserUuid,
+                                                                        @Valid @ModelAttribute StoreFilterRequest request,
+                                                                        @PageableDefault(size = 12, sort = "createdAt", direction = Sort.Direction.DESC)
+                                                                        Pageable pageable) {
+
+        Page<StoreSummaryResponse> response = storeService.getStoresBasedOnFilters(loggedInUserUuid, request, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -56,7 +66,7 @@ public class StoreController {
 
     @PutMapping("/{storeUuid}")
     public ResponseEntity<StoreSummaryResponse> update(@AuthenticationPrincipal(expression = "currentUser.uuid") String userUuid,
-                                                       @PathVariable("storeUuid") String storeUuid,
+                                                       @PathVariable String storeUuid,
                                                        @Valid @RequestBody UpdateStoreRequest request) {
         StoreSummaryResponse response = storeService.update(userUuid, storeUuid, request);
         return ResponseEntity.ok(response);
