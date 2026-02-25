@@ -3,6 +3,7 @@ package org.viators.personalfinanceapp.store;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface StoreRepository extends JpaRepository<Store, Long> {
+public interface StoreRepository extends JpaRepository<Store, Long>, JpaSpecificationExecutor<Store> {
 
     @Query("""
             select s from Store s
@@ -50,4 +51,5 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
                                               Pageable pageable);
 
     boolean existsByNameIgnoreCaseAndStatusAndUserIsNotNullAndUser_Uuid(String name, String status, String userUuid);
+
 }

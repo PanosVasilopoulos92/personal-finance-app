@@ -8,10 +8,10 @@ import java.time.Instant;
 
 public record ItemSearchFilterRequest(
 
-        @Schema(description = "Keyword to search in item name (case-insensitive, partial match)",
+        @Schema(description = "Keyword to search item name (case-insensitive, partial match)",
                 example = "milk",
                 nullable = true)
-        String keyword,
+        String nameKeyword,
 
         @Schema(description = "Filter by item status. Defaults to ACTIVE when omitted.",
                 example = "ACTIVE",
