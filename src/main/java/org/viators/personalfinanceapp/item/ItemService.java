@@ -10,20 +10,21 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.viators.personalfinanceapp.category.Category;
 import org.viators.personalfinanceapp.category.CategoryRepository;
+import org.viators.personalfinanceapp.common.enums.CurrencyEnum;
+import org.viators.personalfinanceapp.common.enums.StatusEnum;
+import org.viators.personalfinanceapp.exceptions.BusinessValidationException;
+import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
 import org.viators.personalfinanceapp.inflationcalc.dto.response.InflationCalculationResponse;
 import org.viators.personalfinanceapp.item.dto.request.CreateItemRequest;
+import org.viators.personalfinanceapp.item.dto.request.ItemSearchFilterRequest;
 import org.viators.personalfinanceapp.item.dto.request.UpdateItemPriceRequest;
 import org.viators.personalfinanceapp.item.dto.request.UpdateItemRequest;
 import org.viators.personalfinanceapp.item.dto.response.ItemDetailsResponse;
 import org.viators.personalfinanceapp.item.dto.response.ItemSummaryResponse;
-import org.viators.personalfinanceapp.priceobservation.dto.response.PriceObservationSummaryResponse;
-import org.viators.personalfinanceapp.exceptions.BusinessValidationException;
-import org.viators.personalfinanceapp.exceptions.ResourceNotFoundException;
-import org.viators.personalfinanceapp.common.enums.CurrencyEnum;
-import org.viators.personalfinanceapp.common.enums.StatusEnum;
 import org.viators.personalfinanceapp.priceobservation.PriceObservation;
 import org.viators.personalfinanceapp.priceobservation.PriceObservationRepository;
 import org.viators.personalfinanceapp.priceobservation.PriceObservationSpecs;
+import org.viators.personalfinanceapp.priceobservation.dto.response.PriceObservationSummaryResponse;
 import org.viators.personalfinanceapp.security.OwnershipAuthorizationService;
 import org.viators.personalfinanceapp.store.Store;
 import org.viators.personalfinanceapp.store.StoreRepository;
@@ -154,7 +155,7 @@ public class ItemService {
         item.setStatus(StatusEnum.INACTIVE.getCode());
     }
 
-    public Page<PriceObservationSummaryResponse> getAllPriceObservations(String itemUuid, LocalDate dateFrom,
+    public Page<PriceObservationSummaryResponse> getPriceObservationsWithDateRange(String itemUuid, LocalDate dateFrom,
                                                                          LocalDate dateTo, Pageable pageable) {
 
         Specification<PriceObservation> spec = Specification.where(PriceObservationSpecs.hasItemUuid(itemUuid));
@@ -171,7 +172,8 @@ public class ItemService {
                 .map(PriceObservationSummaryResponse::from);
     }
 
-    public InflationCalculationResponse calculateInflation(String userUuid, String itemUuid, CurrencyEnum currency, LocalDate startDate, LocalDate endDate) {
+    public InflationCalculationResponse calculateInflation(String userUuid, String itemUuid, CurrencyEnum currency,
+                                                           LocalDate startDate, LocalDate endDate) {
 
         if (startDate.isAfter(endDate) || startDate.isAfter(LocalDate.now())) {
             throw new BusinessValidationException("Invalid date range provided");
@@ -206,4 +208,40 @@ public class ItemService {
                 null
         );
     }
+
+    public Page<ItemSummaryResponse> searchItems(String userUuid, ItemSearchFilterRequest request, Pageable pageable) {
+        Specification<Item> spec = Specification.where(ItemSpecs.belongsToUser(userUuid));
+
+        if (request.status() != null) {
+            spec = spec.and(ItemSpecs.hasStatus(request.status()));
+        }
+
+        if (request.brand() != null) {
+            spec = spec.and(ItemSpecs.hasBrand(request.brand()));
+        }
+
+        if (request.itemUnit() != null) {
+            spec = spec.and(ItemSpecs.hasUnit(request.itemUnit()));
+        }
+
+        if (request.isFavorite() != null) {
+            spec = spec.and(ItemSpecs.isFavorite());
+        }
+
+        if (request.categoryUuid() != null) {
+            spec = spec.and(ItemSpecs.inCategory(request.categoryUuid()));
+        }
+
+        if (request.createdAfter() != null) {
+            spec = spec.and(ItemSpecs.createdAfter(request.createdAfter()));
+        }
+
+        if (request.createdBefore() != null) {
+            spec = spec.and(ItemSpecs.createdBefore(request.createdBefore()));
+        }
+
+        log.debug("Fetching Item through filter search");
+        return itemRepository.findAll(spec, pageable).map(ItemSummaryResponse::from);
+    }
+
 }
